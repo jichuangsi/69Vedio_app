@@ -1,0 +1,453 @@
+<template>
+    <div class="My">
+    <div class="top">
+        <img src="../assets/images/cd29fe54b110d82bbe16d8400e0383b6.jpg" alt="">
+    </div>
+    <div class="center">
+        <div class="user">
+            <div class="userimg">
+                <img src="../assets/images/星星.png" alt="">
+            </div>
+            <div class="user_box">
+                <div class="username">爱笑的女孩</div>
+                <div class="usersex">账户：545454136323</div>
+                <div class="usertext">广州市 25岁</div>
+            </div>
+            <div class="user_btn">编辑</div>
+        </div>
+        <div class="watch">
+            剩余观看次数：<span>8</span>/10
+        </div>
+        <div class="synopsis">
+            个人简介 <span>(100字以内)</span>
+        </div>
+        <div class="textare">
+
+        </div>
+        <div class="num">
+            <div @click="follow_go(1)">
+                <span>156</span>
+                粉丝
+            </div>
+            <div @click="follow_go(0)">
+                <span>156</span>
+                关注
+            </div>
+            <div>
+                <span>156</span>
+                被赞
+            </div>
+            <div>
+                <span>156</span>
+                金币
+            </div>
+        </div>
+        <div class="nav">
+            <div>
+                <div class="fxwx"></div>
+                <span>分享无限</span>
+            </div>
+            <div>
+                <router-link to="wallet">
+                    <div class="wdqb"></div>
+                    <span>我的钱包</span>
+                </router-link>
+            </div>
+            <div>
+                <div class="vipcz"></div>
+                <span>VIP充值</span>
+            </div>
+            <div>
+                <div class="dlzq"></div>
+                <span>代理赚钱</span>
+            </div>
+        </div>
+        <div class="ranking_box">
+            <div class="ranking_nav">
+                <div class="ranking_text">
+                    <span>相册</span>
+                    <span>我的照片</span>
+                </div>
+                <div class="ranking_first wdzp">
+                </div>
+            </div>
+            <div class="ranking_nav">
+                <div class="ranking_text">
+                    <span>社区</span>
+                    <span>我的社区</span>
+                </div>
+                <div class="ranking_first wdsq">
+                </div>
+            </div>
+        </div>
+        <div class="tab_nav">
+            <div :class="{tab_check:tab_check == 0}" @click="tabclick(0)">作品<em></em></div>
+            <div :class="{tab_check:tab_check == 1}" @click="tabclick(1)">喜欢<em></em></div>
+            <div :class="{tab_check:tab_check == 2}" @click="tabclick(2)">购买<em></em></div>
+        </div>
+        <swiper :options="tab_my" ref="tab_my" @slideChangeTransitionEnd="tab_mycallback">
+            <swiper-slide>
+                    <div class="wonderful_nav">
+                        <div class="wonderful_li" v-for="(item,index) in works_arr" :key="index" @click="singleGo(works_arr,index)">
+                            <div class="wonderful_img">
+                                <img :src="item.posterimg" alt="">
+                                <div class="userimg">
+                                    <img :src="item.userimg" alt="">
+                                </div>
+                            </div>
+                            <div class="wonderful_text">
+                                {{item.title}}
+                            </div>
+                        </div>
+                    </div>
+            </swiper-slide>
+            <swiper-slide>
+                    <div class="wonderful_nav">
+                        <div class="wonderful_li" v-for="(item,index) in love_arr" :key="index" @click="singleGo(works_arr,index)">
+                            <div class="wonderful_img">
+                                <img :src="item.posterimg" alt="">
+                                <div class="userimg">
+                                    <img :src="item.userimg" alt="">
+                                </div>
+                            </div>
+                            <div class="wonderful_text">
+                                {{item.title}}
+                            </div>
+                        </div>
+                    </div>
+            </swiper-slide>
+            <swiper-slide>
+                    <div class="wonderful_nav">
+                        <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(works_arr,index)">
+                            <div class="wonderful_img">
+                                <img :src="item.posterimg" alt="">
+                                <div class="userimg">
+                                    <img :src="item.userimg" alt="">
+                                </div>
+                            </div>
+                            <div class="wonderful_text">
+                                {{item.title}}
+                            </div>
+                        </div>
+                    </div>
+            </swiper-slide>
+        </swiper>
+    </div>
+    <foot :check_index='check_index'></foot>
+    </div>
+</template>
+
+<script>
+import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import  foot  from '@/components/Foot'
+export default {
+  name: 'My',
+  components: {
+    swiper,
+    swiperSlide,
+    foot
+  },
+  data() {
+    return {
+        check_index:4,
+        tab_check: 0,
+        tab_my: {
+            outHeight: true,
+            observer: true,
+        },
+        works_arr:[],
+        love_arr:[],
+        purchase_arr:[]
+    }
+  },
+  computed: {
+    tab_myswiper() {
+      return this.$refs.tab_my.swiper
+    }
+  },
+  mounted () {
+      this.works_arr = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
+  },
+  methods: {
+    tab_mycallback(){
+        this.tab_check = this.tab_myswiper.realIndex
+    },
+    tabclick(index){
+        this.tab_check = index
+        this.tab_myswiper.slideTo(index)
+    },
+    follow_go(index){
+        this.$router.push({
+          path: '/follow',
+          query: {
+            index: index
+          }
+        })
+    },
+    singleGo(arr,index) {
+        localStorage.setItem('Single',JSON.stringify(arr))
+        localStorage.setItem('Single_index',index)
+        this.$router.push({
+          path: '/Single_video'
+        })
+    }
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.top {
+    width: 100%;
+    height: 152px;
+    overflow: hidden;
+}
+.top img{
+    width: 100%;
+}
+.center {
+    padding: 0px 30px;
+    padding-bottom: 200px;
+}
+.center .user {
+    width: 100%;
+    display: flex;
+    font-size: 26px;
+    color: #fff;
+    align-items: center;
+    margin-bottom: 50px;
+}
+.center .user .userimg {
+    width: 160px;
+    margin-right: 26px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-top: -20px;
+}
+.center .user .userimg img {
+    width: 100%;
+}
+.center .user .user_box {
+    flex: 1;
+}
+.center .user .user_box div{
+    margin-bottom: 10px;
+    line-height: 36px;
+}
+.center .user .user_btn {
+    width: 130px;
+    height: 60px;
+    border-radius: 60px;
+    font-size: 30px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 60px;
+    border: 1px solid #999999;
+    color: #999999;
+}
+.center .watch {
+    font-size: 32px;
+    line-height: 46px;
+    color: #fff;
+    margin: 40px 0px;
+}
+.center .synopsis {
+    font-size: 26px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+.center .synopsis span{
+    font-size: 24px;
+    color: #999;
+}
+.center .textare {
+    margin-bottom: 45px;
+    padding: 20px;
+    line-height: 36px;
+    font-size: 22px;
+    color: #999999;
+    border: 1px solid #2b2121;
+}
+.center .num {
+    width: 100%;
+    height: 36px;
+    font-size: 26px;
+    margin-bottom: 40px;
+}
+.center .num div {
+    display: inline-block;
+    color: #9999;
+    margin-left: 40px;
+    line-height: 36px;
+    position: relative;
+}
+.center .num div span {
+    color: #fff;
+}
+.center .num div:first-child {
+    margin-left: 0px;
+}
+.center .nav {
+    width: 100%;
+    font-size: 28px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+}
+.center .nav div {
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.center .nav div a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.center .nav div div {
+    width: 64px;
+    height: 64px;
+    background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
+    background-size: 750px 4532px;
+    margin-bottom: 20px;
+}
+.center .nav div .fxwx {
+    background-position: -16px -1058px;
+}
+.center .nav div .wdqb {
+    background-position: -16px -1174px;
+}
+.center .nav div .vipcz {
+    background-position: -16px -1280px;
+}
+.center .nav div .dlzq {
+    background-position: -16px -1380px;
+}
+.center .ranking_box {
+    width: 100%;
+    height: 148px;
+    background-color: #1d0f11;
+    display: flex;
+    margin-bottom: 40px;
+}
+.center .ranking_box .ranking_nav {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    padding: 20px;
+}
+.center .ranking_box .ranking_nav:first-child{
+    border-right: 1px solid #2b2121;
+}
+.center .ranking_box .ranking_text{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+.center .ranking_box .ranking_text span:last-child {
+    margin-top: 26px;
+    color: #999999;
+}
+.center .ranking_box .ranking_first{
+    display: flex;
+    justify-content: center;
+    font-size: 26px;
+    align-items: center;
+    background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
+    background-size: 750px 4532px;
+    margin-right: 20px;
+}
+.center .ranking_box .wdzp{
+    width: 102px;
+    height: 81px;
+    background-position: -16px -1499px;
+}
+.center .ranking_box .wdsq{
+    width: 100px;
+    height: 92px;
+    background-position: -16px -1633px;
+}
+.center .tab_nav {
+    display: flex;
+    justify-content: center;
+    font-size: 28px;
+    color: #999;
+    line-height: 48px;
+}
+.center .tab_nav div {
+    position: relative;
+    flex: 1;
+    text-align: center;
+}
+.center .tab_nav div:first-child{
+    margin-right: 60px;
+}
+.center .tab_nav .tab_check {
+    white-space: nowrap;
+    color: #fff;
+    font-weight: 600;
+}
+.center .tab_nav .tab_check em {
+    display: inline-block;
+    width: 100%;
+    border-bottom: 6px solid #ff3841;
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    transform: translateX(-50%);
+}
+.center .swiper-container {
+    margin-top: 20px;
+}
+.center .wonderful_nav {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.center .wonderful_nav .wonderful_li {
+    width: 330px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+.center .wonderful_nav .wonderful_li:nth-child(2n){
+    margin-right: 0px;
+}
+.center .wonderful_nav .wonderful_li .wonderful_img {
+    width: 100%;
+    height: 595px;
+    position: relative;
+}
+.center .wonderful_nav .wonderful_li .wonderful_img img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.center .wonderful_nav .wonderful_li .wonderful_img .userimg {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+.center .wonderful_nav .wonderful_li .wonderful_text{
+    width: 90%;
+    margin: 20px auto;
+    font-size: 26px;
+    line-height: 36px;
+    color: #fff;
+    text-overflow: -o-ellipsis-lastline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+</style>
