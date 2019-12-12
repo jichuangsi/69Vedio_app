@@ -27,6 +27,9 @@
     <feature name="Device">
         <param name="android-package" value="org.apache.cordova.device.Device" />
     </feature>
+    <feature name="VideoEditor">
+        <param name="android-package" value="org.apache.cordova.videoeditor.VideoEditor" />
+    </feature>
     <name>69视频</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
@@ -43,5 +46,10 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <allow-intent href="market:*" />
+    <icon density="ldpi" src="res/icon/android/icon.png" />
+    <icon density="mdpi" src="res/icon/android/icon.png" />
+    <icon density="hdpi" src="res/icon/android/icon.png" />
+    <icon density="xhdpi" src="res/icon/android/icon.png" />
+    <icon density="xxhdpi" src="res/icon/android/icon.png" />
     <preference name="loglevel" value="DEBUG" />
 </widget>

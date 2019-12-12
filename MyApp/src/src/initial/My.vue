@@ -58,8 +58,10 @@
                 <span>VIP充值</span>
             </div>
             <div>
-                <div class="dlzq"></div>
-                <span>代理赚钱</span>
+                <router-link to="Extension">
+                    <div class="dlzq"></div>
+                    <span>代理赚钱</span>
+                </router-link>
             </div>
         </div>
         <div class="ranking_box">
@@ -270,16 +272,17 @@ export default {
 .center .num {
     width: 100%;
     height: 36px;
-    font-size: 26px;
+    font-size: 24px;
     margin-bottom: 40px;
 }
 .center .num div {
     display: inline-block;
     color: #9999;
-    margin-left: 40px;
+    margin-left: 20px;
     line-height: 36px;
     position: relative;
 }
+
 .center .num div span {
     color: #fff;
 }
@@ -288,7 +291,7 @@ export default {
 }
 .center .nav {
     width: 100%;
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 40px;
     display: flex;
     justify-content: space-between;
@@ -347,7 +350,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 20px;
 }
 .center .ranking_box .ranking_text span:last-child {
@@ -357,7 +360,7 @@ export default {
 .center .ranking_box .ranking_first{
     display: flex;
     justify-content: center;
-    font-size: 26px;
+    font-size: 24px;
     align-items: center;
     background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
     background-size: 750px 4532px;

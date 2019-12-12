@@ -39,10 +39,6 @@
                 <span>156</span>
                 被赞
             </div>
-            <div>
-                <span>156</span>
-                金币
-            </div>
         </div>
         <div class="tab_nav">
             <div :class="{tab_check:tab_check == 0}" @click="tabclick(0)">作品<em></em></div>
@@ -272,7 +268,7 @@ export default {
 .center .num div {
     display: inline-block;
     color: #9999;
-    margin-left: 40px;
+    margin-left: 20px;
     line-height: 36px;
     position: relative;
 }

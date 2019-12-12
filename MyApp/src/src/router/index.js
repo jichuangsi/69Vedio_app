@@ -17,6 +17,7 @@ import nearby from '@/components/nearby'
 import friend from '@/components/friend'
 import Video_play from '@/components/Video_play'
 import Single_video from '@/components/Single_video'
+import Extension from '@/components/Extension'
 import Foot from '@/components/Foot'
 
 Vue.use(Router)
@@ -107,6 +108,11 @@ export default new Router({
       path: '/Single_video',
       name: 'Single_video',
       component: Single_video
+    },
+    {
+      path: '/Extension',
+      name: 'Extension',
+      component: Extension
     },
     {
       path: '/Foot',

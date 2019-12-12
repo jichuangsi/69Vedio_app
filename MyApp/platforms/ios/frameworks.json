@@ -1,5 +1,7 @@
 {
     "ImageIO.framework": 1,
     "CoreLocation.framework": 2,
-    "AVFoundation.framework": 1
+    "AVFoundation.framework": 2,
+    "MediaPlayer.framework": 1,
+    "CoreVideo.framework": 1
 }

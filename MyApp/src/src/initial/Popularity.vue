@@ -10,7 +10,7 @@
         </div>
         <div class="center">
             <div class="activity">
-
+                <img src="../assets/images/微信图片_20191212151058.png" alt="">
             </div>
             <div class="nav">
                 <div>
@@ -244,7 +244,7 @@ export default {
 .center .activity {
     width: 100%;
     height: 142px;
-    background-color: #fff;
+    // background-color: #fff;
     margin-bottom: 40px;
 }
 .center .activity img {
@@ -295,7 +295,6 @@ export default {
 .center .community .community_btn {
     width: 690px;
     height: 100px;
-    border-radius: 100px;
      background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
      background-size: 750px 4532px;
      background-position: -16px -4036px;

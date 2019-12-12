@@ -318,6 +318,30 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "clobbers": [
         "device"
       ]
+    },
+    {
+      "id": "cordova-plugin-video-editor.VideoEditor",
+      "file": "plugins/cordova-plugin-video-editor/www/VideoEditor.js",
+      "pluginId": "cordova-plugin-video-editor",
+      "clobbers": [
+        "VideoEditor"
+      ]
+    },
+    {
+      "id": "cordova-plugin-video-editor.VideoEditorOptions",
+      "file": "plugins/cordova-plugin-video-editor/www/VideoEditorOptions.js",
+      "pluginId": "cordova-plugin-video-editor",
+      "clobbers": [
+        "VideoEditorOptions"
+      ]
+    },
+    {
+      "id": "cordova-plugin-splashscreen.SplashScreen",
+      "file": "plugins/cordova-plugin-splashscreen/www/splashscreen.js",
+      "pluginId": "cordova-plugin-splashscreen",
+      "clobbers": [
+        "navigator.splashscreen"
+      ]
     }
   ];
   module.exports.metadata = {
@@ -328,6 +352,8 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
     "cordova-plugin-file-transfer": "1.7.1",
     "cordova-plugin-camera": "4.1.0",
     "cordova-plugin-geolocation": "4.0.2",
-    "cordova-plugin-device": "2.0.3"
+    "cordova-plugin-device": "2.0.3",
+    "cordova-plugin-video-editor": "1.1.3",
+    "cordova-plugin-splashscreen": "5.0.3"
   };
 });

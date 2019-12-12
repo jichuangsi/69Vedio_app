@@ -15,9 +15,9 @@ import MintUI from 'mint-ui'
 import 'mint-ui/lib/style.css'
 Vue.use(MintUI)
 
-// import Vconsole from 'vconsole'
-// const vConsole = new Vconsole()
-// Vue.use(vConsole) 
+import Vconsole from 'vconsole'
+const vConsole = new Vconsole()
+Vue.use(vConsole) 
 
 Vue.use(VueCorvova);
 
@@ -29,4 +29,7 @@ new Vue({
   store,
   components: { App },
   template: '<App/>'
+})
+router.afterEach((to,from,next) => {
+  window.scrollTo(0,0);
 })

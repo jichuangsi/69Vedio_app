@@ -18,24 +18,26 @@
                 上传视频&封面
             </div>
             <div class="mp4">
+                <!--  @click="bottom_box('拍摄视频')" -->
                 <div class="file_box" @click="bottom_box('拍摄视频')">
                     <div class="add">+</div>
                     <div>上传视频</div>
                     <video loop v-if="filevideo">
                         <source :src="filevideo" type="video/mp4">
                     </video>
-                    <!-- <input type="file" name="" id=""> -->
+                    <!-- <input type="file" name="" id="video"> -->
                 </div>
                 <div>
                     <sup>※</sup>视频大小不能超过50M
                 </div>
             </div>
             <div class="png">
+                <!--  @click="bottom_box('拍摄图片')" -->
                 <div class="file_box" @click="bottom_box('拍摄图片')">
                     <div class="add">+</div>
                     <div>上传图片</div>
                     <img :src="fileimg" v-if="fileimg" alt="">
-                    <!-- <input type="file" name="" id=""> -->
+                    <!-- <input type="file" name="" id="img"> -->
                 </div>
                 <div>
                     <sup>※</sup>点击选择封面（必选）
@@ -94,6 +96,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+import {upload} from '@/api/api'
 import { Toast } from 'mint-ui';
 export default {
   name: 'Upload',
@@ -110,7 +114,8 @@ export default {
       bigstate: false,
       ylstate: false,
       title:'',
-      money:''
+      money:0,
+      param:''
     }
   },
   computed:{
@@ -124,11 +129,54 @@ export default {
   },
   mounted () {
     this.initialize();
+    this.param = new FormData()
   },
   methods: {
       uploadBtn(){
-          
-              Toast('上传成功')
+        //   console.log(document.getElementById('img').files)
+        //   let self = this
+        //   self.param.append('title',self.title)
+        //   self.param.append('accept',self.Agreement_state?0:1)
+        //   self.param.append('gold',self.money)
+        //   self.param.append('fileimg',document.getElementById('img').files[0])
+        //   self.param.append('filevideo',document.getElementById('video').files[0])
+            // self.param.title = self.title
+            // self.param.accept = self.Agreement_state
+            // self.param.gold = self.money
+            // self.param.fileimg = document.getElementById('img').files[0]
+            // self.param.filevideo = document.getElementById('video').files[0]
+
+        //     console.log(self.param)
+        //   upload(self.param).then(res=>{
+        //       console.log(res)
+        //   }).catch(err=>{
+        //       console.log(err)
+        //   })
+            // console.log(self.param.get('filevideo'))
+            // console.log(self.param.get('fileimg'))
+            // const instance=axios.create({
+            // withCredentials: true
+            // }) 
+              
+        // axios.post('http://192.168.31.108:71/Videoservice/upload',
+        // self.param,
+        // {
+        //     headers: {
+        //         'Content-Type': 'application/x-www-form-urlencoded'
+        //     }
+        // }
+        // ).then(res=>{
+        //     console.log(res)
+        //         if(res.code == 200){
+        //             alert('提交成功');
+        //         }else{
+        //             alert("请输入完整再提交");
+        //         }
+
+        //     })    
+
+
+
           if(this.btnstate){
               let data = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
               data.push({
@@ -148,6 +196,7 @@ export default {
               this.title = ''
               this.money = ''
               this.ipt_arr = [1]
+              Toast('上传成功')
           }
       },
     initialize() {
@@ -193,27 +242,99 @@ export default {
     sp(){
         let self = this
         navigator.device.capture.captureVideo(
-            onSuccess,// 视频录制成功后的处理
+            onSuccess,// 视频录制功后的处理成
             onFail, // 视频录制失败后的处理
             {
                 duration: 15,// 限制录制的视频时间长度，单位：/秒
-                limit:1 // 非必填，不写此项时，默认为1
+                limit:1, // 非必填，不写此项时，默认为1
                 // 在ios一次只能录一个视频，
                 //在Android上，连续录制视频的个数受limit的限制
+                quality: 1
             }
         );
         function onSuccess(res){
             console.log(res)
             console.log(res[0].localURL)
             self.filevideo = res[0].fullPath
-            
             self.$refs.sp_video.src = res[0].fullPath
             self.bottom_check = false
-        }
+            
+            var file = res[0];
+            var videoFileName = file.name.split('.')[0];
+            let ratio = (file.size/1048576)/15;
+            let expressed = ratio*1048576;
+            console.log(file)
+            VideoEditor.transcodeVideo(
+                    videoTranscodeSuccess,
+                    videoTranscodeError,
+                    {
+                        fileUri: file.fullPath,
+                        outputFileName: videoFileName,
+                        outputFileType: VideoEditorOptions.OutputFileType.MPEG4,
+                        optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES,
+                        saveToLibrary: true,
+                        maintainAspectRatio: true,
+                        // width: 640,
+                        // height: 640,
+                        videoBitrate: expressed, // 1 megabit
+                        audioChannels: 2,
+                        audioSampleRate: 44100,
+                        audioBitrate: 128000, // 128 kilobits
+                        progress: function(info) {
+                            console.log('transcodeVideo progress callback, info: ' + info);
+                        }
+                    }
+                );
+            }
+            
+            function videoTranscodeSuccess(result) {
+                // result is the path to the transcoded video on the device
+                console.log('videoTranscodeSuccess, result: ' + result);
+
+                
+                    self.filevideo = result
+                    self.$refs.sp_video.src = result
+                    let url = 'file://'+result
+                window.resolveLocalFileSystemURL(url, (fileEntry) => {
+                    console.log(fileEntry)
+                    let sss = new FormData()
+                    sss.append('dss','444')
+                    sss.append('asd',fileEntry[0])
+                    console.log(sss)
+                    console.log(sss.getAll())
+                })
+            }
+            
+            function videoTranscodeError(err) {
+                console.log('videoTranscodeError, err: ' + err);
+            }
+
+
+
+
+            // window.resolveLocalFileSystemURL(res[0].fullPath, (fileEntry) => {
+            //     fileEntry.file(function (file) {
+            //     let reader = new FileReader();
+            //     reader.onloadend = function () {
+            //     //reader.readAsText(file);
+            //     reader.readAsBinaryString(file);
+            //     console.log(1111)
+            //     console.log(file)
+            //     // reader.readAsDataURL(file);
+            //     }, () => {
+            //         alert(111)
+            //     }
+            //     });
+            //     }, self.errorCallback)
+            // }
         function onFail(err){
             console.log(err)
             self.bottom_check = false
         }
+    },
+    errorCallback(err){
+        console.log(1122)
+        console.log(err)
     },
     zp(){
         let self = this
@@ -262,6 +383,32 @@ export default {
         self.filevideo = 'file://'+ mp4Data
         self.$refs.sp_video.src = 'file://'+ mp4Data
         self.bottom_check = false
+
+
+        
+        window.resolveLocalFileSystemURL(self.filevideo, (fileEntry) => {
+            console.log(fileEntry)
+        fileEntry.file(function (file) {
+            self.param.filevideo = file
+            
+            console.log(self.param)
+        let reader = new FileReader();
+        reader.onloadend = function () {
+            console.log(this)
+        //reader.readAsText(file);
+        // reader.readAsBinaryString(file);
+        // reader.readAsDataURL(file);
+        }, () => {
+            console.log(555)
+        }
+        });
+        }, (err)=>{
+            console.log(6666)
+            console.log(err)
+        })
+
+
+
         }
         function onFail(message) {
         console.log(message)
@@ -284,8 +431,41 @@ export default {
         });
         function onSuccess(imageData) {
         console.log(imageData)
+
         self.fileimg = imageData
         self.bottom_check = false
+
+
+        
+        window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
+            console.log(fileEntry)
+        fileEntry.file(function (file) {
+            self.param.fileimg = file
+            
+            console.log(self.param)
+        let reader = new FileReader();
+        reader.onloadend = function (e) {
+        //reader.readAsText(file);
+
+        
+        // let imgBlob = new Blob([this.result], { type: "png"})
+        // console.log(imgBlob)
+        // self.param.append('fileimg',imgBlob,'ss.png')
+        // console.log(self.param.get('fileimg'))
+
+        reader.readAsBinaryString(file);
+        // reader.readAsDataURL(file);
+        }, () => {
+            console.log(555)
+        }
+        });
+        }, (err)=>{
+            console.log(6666)
+            console.log(err)
+        })
+
+
+
         }
         function onFail(message) {
         console.log(message)
@@ -366,7 +546,7 @@ export default {
 }
 .center .video_box {
     margin-bottom: 60px;
-    font-size: 28px;
+    font-size: 26px;
     line-height: 36px;
     color: #999;
 }
@@ -411,18 +591,20 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 }
 .center .video_price .ipt input {
-    width: 436px;
+    flex:1;
     height: 100%;
     background-color: #241618 !important;
     color: #fff;
     padding: 0px 30px;
 }
 .center .video_price .ipt span {
+    width: 100%;
     font-size: 26px;
     color: #999999;
-    margin-left: 42px;
+    margin-top: 20px;
 }
 .center .video_label {
     margin-bottom: 60px;
@@ -439,7 +621,6 @@ export default {
     background-color: #241618 !important;
     color: #fff;
     padding: 0px 10px;
-    margin-right: 20px;
     margin-bottom: 20px;
 }
 .center .video_label .ipt div {
@@ -460,13 +641,13 @@ export default {
 .center .Agreement div {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
     background-color: #999999;
     margin-right: 10px;
-}
-.center .Agreement .Agreement_check {
     background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
     background-size: 750px 4532px;
+    background-position: -16px -4425px;
+}
+.center .Agreement .Agreement_check {
     background-position: -314px -4425px;
 }
 .center .upload_btn {
@@ -506,21 +687,21 @@ export default {
     position: fixed;
     bottom: 0px;
     left: 0px;
-    transform: translateY(100%)
+    transform: translateY(100%);
 }
 .bottom_check {
     transform: translateY(0%)
 }
 .bottom_check .ps {
-    width: 690px;
+    width: 100%;
     height: 136px;
     border-bottom: 1px solid #dddddd;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     font-size: 32px;
     text-align: center;
+    margin: 0 auto;
 }
 .bottom_check .ps .text {
     font-size: 26px;
@@ -528,7 +709,7 @@ export default {
     margin-top: 10px;
 }
 .bottom_check .xz {
-    width: 690px;
+    width: 100%;
     text-align: center;
     font-size: 32px;
     line-height: 107px;

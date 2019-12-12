@@ -15,7 +15,7 @@
             <img :src="item.userimg" alt="">
             <span>+</span>
             </div>
-            <div class="love">
+            <div class="love" :class="{love_check:lovelist.indexOf(index)!=-1}" @click="love(index)">
             <span></span>
             <span>{{item.love}}</span>
             </div>
@@ -57,7 +57,8 @@ export default {
       video_arr: [],
       video_check:'',
       video_data:[],
-      video_index:0
+      video_index:0,
+      lovelist:''
     }
   },
   computed: {
@@ -78,6 +79,15 @@ export default {
     },500)
   },
   methods: {
+      love(index){
+        if(this.lovelist.indexOf(index)!=-1){
+            this.lovelist = this.lovelist.split(index)[0]+ this.lovelist.split(index)[0]
+            this.video_data[index].love = Number(this.video_data[index].love)-1
+        }else{
+            this.video_data[index].love = Number(this.video_data[index].love)+1
+            this.lovelist += index
+        }
+      },
     Recommendcallback(){
         console.log(this.Recommendswiper.realIndex)
         this.video_index = this.Recommendswiper.realIndex
@@ -200,6 +210,9 @@ export default {
     background-size: 750px 4532px;
     background-position: -16px -538px;
     margin-bottom: 10px;
+}
+.right_nav .love_check span:first-child{
+    background-position: -314px -538px;
 }
 .right_nav .comment span:first-child{
     width: 71px;

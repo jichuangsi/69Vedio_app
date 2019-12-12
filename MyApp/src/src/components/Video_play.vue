@@ -10,7 +10,7 @@
             <img :src="item.userimg" alt="">
             <span>+</span>
             </div>
-            <div class="love">
+            <div class="love" :class="{love_check:lovelist.indexOf(index)!=-1}" @click="love(index)">
             <span></span>
             <span>{{item.love}}</span>
             </div>
@@ -116,7 +116,8 @@ export default {
               "title":"#肤白貌美大长腿，多少月薪的男生才能追求",
               "musicname":"浙江美女榜"
           }
-      ]
+      ],
+      lovelist:''
     }
   },
   watch: {
@@ -143,6 +144,15 @@ export default {
     this.$emit('video_num', 0);
   },
   methods: {
+      love(index){
+        if(this.lovelist.indexOf(index)!=-1){
+            this.lovelist = this.lovelist.split(index)[0]+ this.lovelist.split(index)[0]
+            this.video_data[index].love = Number(this.video_data[index].love)-1
+        }else{
+            this.video_data[index].love = Number(this.video_data[index].love)+1
+            this.lovelist += index
+        }
+      },
     Recommendcallback(){
         console.log(this.Recommendswiper.realIndex)
         for(let i = 0;i<this.video_arr.length;i++){
@@ -220,6 +230,9 @@ export default {
     background-size: 750px 4532px;
     background-position: -16px -538px;
     margin-bottom: 10px;
+}
+.right_nav .love_check span:first-child{
+    background-position: -314px -538px;
 }
 .right_nav .comment span:first-child{
     width: 71px;
