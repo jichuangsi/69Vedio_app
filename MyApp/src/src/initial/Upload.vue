@@ -25,7 +25,7 @@
                     <video loop v-if="filevideo">
                         <source :src="filevideo" type="video/mp4">
                     </video>
-                    <!-- <input type="file" name="" id="video"> -->
+                    <input type="file" name="" id="video" @change="videochange">
                 </div>
                 <div>
                     <sup>※</sup>视频大小不能超过50M
@@ -37,7 +37,7 @@
                     <div class="add">+</div>
                     <div>上传图片</div>
                     <img :src="fileimg" v-if="fileimg" alt="">
-                    <!-- <input type="file" name="" id="img"> -->
+                    <input type="file" name="" id="img">
                 </div>
                 <div>
                     <sup>※</sup>点击选择封面（必选）
@@ -132,12 +132,31 @@ export default {
     this.param = new FormData()
   },
   methods: {
+      videochange(){
+          
+            var param = new FormData()
+            var reads = new FileReader();
+          let file = document.getElementById('video').files[0]
+            reads.readAsDataURL(file);
+            reads.onloadend = function(e) {
+                let dd = new Blob([this.result],{type:'video/mp4'})
+                console.log(dd)
+                param.append('ss',dd,'sd.mp4')
+                console.log(param.get('ss'))
+            };
+      },
+
+
+
       uploadBtn(){
-        //   console.log(document.getElementById('img').files)
-        //   let self = this
-        //   self.param.append('title',self.title)
-        //   self.param.append('accept',self.Agreement_state?0:1)
-        //   self.param.append('gold',self.money)
+          
+        //   console.log(document.getElementById('video').files)
+        //   console.log(document.getElementById('video').files[0])
+          let self = this
+          
+          self.param.append('title',self.title)
+          self.param.append('accept',self.Agreement_state?0:1)
+          self.param.append('gold',self.money)
         //   self.param.append('fileimg',document.getElementById('img').files[0])
         //   self.param.append('filevideo',document.getElementById('video').files[0])
             // self.param.title = self.title
@@ -146,12 +165,17 @@ export default {
             // self.param.fileimg = document.getElementById('img').files[0]
             // self.param.filevideo = document.getElementById('video').files[0]
 
-        //     console.log(self.param)
-        //   upload(self.param).then(res=>{
-        //       console.log(res)
-        //   }).catch(err=>{
-        //       console.log(err)
-        //   })
+            console.log(self.param.get('title'))
+            console.log(self.param.get('filevideo'))
+            console.log(self.param.get('filevideo').lastModified)
+            console.log(self.param.get('filevideo').name)
+            console.log(self.param.get('filevideo').size)
+            console.log(self.param.get('filevideo').type)
+          upload(self.param).then(res=>{
+              console.log(res)
+          }).catch(err=>{
+              console.log(err)
+          })
             // console.log(self.param.get('filevideo'))
             // console.log(self.param.get('fileimg'))
             // const instance=axios.create({
@@ -178,25 +202,25 @@ export default {
 
 
           if(this.btnstate){
-              let data = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
-              data.push({
-                "video":this.filevideo,
-                "posterimg":this.fileimg,
-                "userimg":require('../assets/images/星星.png'),
-                "love":0,
-                "comment":0,
-                "share":0,
-                "username":"#爱笑的女孩",
-                "title":this.title,
-                "musicname":"爱笑的女孩"
-              })
-              localStorage.setItem('my_video',JSON.stringify(data))
-              this.filevideo = ''
-              this.fileimg = ''
-              this.title = ''
-              this.money = ''
-              this.ipt_arr = [1]
-              Toast('上传成功')
+            //   let data = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
+            //   data.push({
+            //     "video":this.filevideo,
+            //     "posterimg":this.fileimg,
+            //     "userimg":require('../assets/images/星星.png'),
+            //     "love":0,
+            //     "comment":0,
+            //     "share":0,
+            //     "username":"#爱笑的女孩",
+            //     "title":this.title,
+            //     "musicname":"爱笑的女孩"
+            //   })
+            //   localStorage.setItem('my_video',JSON.stringify(data))
+            //   this.filevideo = ''
+            //   this.fileimg = ''
+            //   this.title = ''
+            //   this.money = ''
+            //   this.ipt_arr = [1]
+            //   Toast('上传成功')
           }
       },
     initialize() {
@@ -384,23 +408,32 @@ export default {
         self.$refs.sp_video.src = 'file://'+ mp4Data
         self.bottom_check = false
 
-
         
         window.resolveLocalFileSystemURL(self.filevideo, (fileEntry) => {
-            console.log(fileEntry)
+        
         fileEntry.file(function (file) {
-            self.param.filevideo = file
             
-            console.log(self.param)
-        let reader = new FileReader();
-        reader.onloadend = function () {
-            console.log(this)
+
+
+
+        var reader = new FileReader()
+          reader.onloadend = function() {
+         let imgBlob = new Blob([this.result], {
+            type: "video/mp4"
+        })
+        console.log(imgBlob)
+        
+        // let file = new File([imgBlob], "yigeshipin", {type: "video/mp4"})
+        // console.log(2)
+        // console.log(file)
+        self.param.append('filevideo', imgBlob)
         //reader.readAsText(file);
         // reader.readAsBinaryString(file);
         // reader.readAsDataURL(file);
         }, () => {
             console.log(555)
         }
+          reader.readAsDataURL(file)
         });
         }, (err)=>{
             console.log(6666)
@@ -440,24 +473,21 @@ export default {
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
             console.log(fileEntry)
         fileEntry.file(function (file) {
-            self.param.fileimg = file
-            
-            console.log(self.param)
         let reader = new FileReader();
-        reader.onloadend = function (e) {
+        reader.onloadend = function () {
         //reader.readAsText(file);
 
         
-        // let imgBlob = new Blob([this.result], { type: "png"})
+        let imgBlob = new Blob([this.result], { type: "image/png"})
         // console.log(imgBlob)
-        // self.param.append('fileimg',imgBlob,'ss.png')
+        self.param.append('fileimg',imgBlob)
         // console.log(self.param.get('fileimg'))
 
-        reader.readAsBinaryString(file);
-        // reader.readAsDataURL(file);
+        // reader.readAsBinaryString(file);
         }, () => {
             console.log(555)
         }
+        reader.readAsDataURL(file);
         });
         }, (err)=>{
             console.log(6666)
