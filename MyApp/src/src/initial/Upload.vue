@@ -133,7 +133,7 @@ export default {
   },
   methods: {
       videochange(){
-          
+
             var param = new FormData()
             var reads = new FileReader();
           let file = document.getElementById('video').files[0]
@@ -149,13 +149,13 @@ export default {
 
 
       uploadBtn(){
-          
+
         //   console.log(document.getElementById('video').files)
         //   console.log(document.getElementById('video').files[0])
           let self = this
-          
+
           self.param.append('title',self.title)
-          self.param.append('accept',self.Agreement_state?0:1)
+          self.param.append('accept',self.Agreement_state?1:0)
           self.param.append('gold',self.money)
         //   self.param.append('fileimg',document.getElementById('img').files[0])
         //   self.param.append('filevideo',document.getElementById('video').files[0])
@@ -165,12 +165,15 @@ export default {
             // self.param.fileimg = document.getElementById('img').files[0]
             // self.param.filevideo = document.getElementById('video').files[0]
 
-            console.log(self.param.get('title'))
+          /*console.log(self.param)
+          console.log(self.param.get('fileimg'))*/
+
+            /*console.log(self.param.get('title'))
             console.log(self.param.get('filevideo'))
             console.log(self.param.get('filevideo').lastModified)
             console.log(self.param.get('filevideo').name)
             console.log(self.param.get('filevideo').size)
-            console.log(self.param.get('filevideo').type)
+            console.log(self.param.get('filevideo').type)*/
           upload(self.param).then(res=>{
               console.log(res)
           }).catch(err=>{
@@ -180,8 +183,8 @@ export default {
             // console.log(self.param.get('fileimg'))
             // const instance=axios.create({
             // withCredentials: true
-            // }) 
-              
+            // })
+
         // axios.post('http://192.168.31.108:71/Videoservice/upload',
         // self.param,
         // {
@@ -197,7 +200,7 @@ export default {
         //             alert("请输入完整再提交");
         //         }
 
-        //     })    
+        //     })
 
 
 
@@ -282,7 +285,7 @@ export default {
             self.filevideo = res[0].fullPath
             self.$refs.sp_video.src = res[0].fullPath
             self.bottom_check = false
-            
+
             var file = res[0];
             var videoFileName = file.name.split('.')[0];
             let ratio = (file.size/1048576)/15;
@@ -310,12 +313,12 @@ export default {
                     }
                 );
             }
-            
+
             function videoTranscodeSuccess(result) {
                 // result is the path to the transcoded video on the device
                 console.log('videoTranscodeSuccess, result: ' + result);
 
-                
+
                     self.filevideo = result
                     self.$refs.sp_video.src = result
                     let url = 'file://'+result
@@ -328,7 +331,7 @@ export default {
                     console.log(sss.getAll())
                 })
             }
-            
+
             function videoTranscodeError(err) {
                 console.log('videoTranscodeError, err: ' + err);
             }
@@ -408,40 +411,34 @@ export default {
         self.$refs.sp_video.src = 'file://'+ mp4Data
         self.bottom_check = false
 
-        
+
         window.resolveLocalFileSystemURL(self.filevideo, (fileEntry) => {
-        
+
         fileEntry.file(function (file) {
-            
-
-
-
         var reader = new FileReader()
-          reader.onloadend = function() {
+          reader.readAsArrayBuffer(file);
+          reader.onload = function() {
          let imgBlob = new Blob([this.result], {
             type: "video/mp4"
         })
         console.log(imgBlob)
-        
+
         // let file = new File([imgBlob], "yigeshipin", {type: "video/mp4"})
         // console.log(2)
         // console.log(file)
-        self.param.append('filevideo', imgBlob)
+        self.param.append('filevideo', imgBlob, 'vid.mp4')
         //reader.readAsText(file);
         // reader.readAsBinaryString(file);
         // reader.readAsDataURL(file);
-        }, () => {
+        }/*, () => {
             console.log(555)
-        }
-          reader.readAsDataURL(file)
+        }*/
+          //reader.readAsDataURL(file)
         });
         }, (err)=>{
             console.log(6666)
             console.log(err)
         })
-
-
-
         }
         function onFail(message) {
         console.log(message)
@@ -464,30 +461,28 @@ export default {
         });
         function onSuccess(imageData) {
         console.log(imageData)
-
         self.fileimg = imageData
         self.bottom_check = false
-
-
-        
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
-            console.log(fileEntry)
+        console.log(fileEntry)
         fileEntry.file(function (file) {
+          console.log(file);
         let reader = new FileReader();
-        reader.onloadend = function () {
+         reader.readAsArrayBuffer(file);
+        reader.onload = function () {
         //reader.readAsText(file);
-
-        
+        /*console.log(this.error);
+        console.log(this.result);
+        console.log(new Blob([this.result]))*/
         let imgBlob = new Blob([this.result], { type: "image/png"})
         // console.log(imgBlob)
-        self.param.append('fileimg',imgBlob)
+        self.param.append('fileimg',imgBlob, 'img.png')
         // console.log(self.param.get('fileimg'))
-
         // reader.readAsBinaryString(file);
-        }, () => {
+        };/*, () => {
             console.log(555)
-        }
-        reader.readAsDataURL(file);
+        }*/
+        //reader.readAsDataURL(file);
         });
         }, (err)=>{
             console.log(6666)
@@ -687,7 +682,7 @@ export default {
     text-align: center;
     font-size: 32px;
     font-weight: 600;
-    background-color: #999999;  
+    background-color: #999999;
     color: #fff;
     letter-spacing: 5px;
     margin: 60px auto;
