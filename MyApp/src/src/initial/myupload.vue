@@ -6,47 +6,79 @@
         <div class="right" @click="Upload">开始上传</div>
     </div>
     <div class="center">
-                    <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(purchase_arr,index)">
-                            <div class="wonderful_img">
-                                <img :src="item.posterimg" alt="">
-                                <div class="userimg">
-                                    <img :src="item.userimg" alt="">
-                                </div>
-                            </div>
-                            <div class="wonderful_text">
-                                {{item.title}}
-                            </div>
-                        </div>
+        <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+        <div class="wonderful_nav">
+            <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(item)">
+                <div class="wonderful_img">
+                    <img :src="item.thumbnail" alt="">
+                    <div class="userimg">
+                        <img :src="item.headimgurl" alt="">
                     </div>
+                </div>
+                <div class="wonderful_text">
+                    {{item.title}}
+                </div>
+            </div>
+         </div>
+        </ScrollContent>
     </div>
     </div>
 </template>
 
 <script>
+import {myvideos} from '@/api/api'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'myupload',
+  components: {
+    ScrollContent
+  },
   data() {
     return {
-        purchase_arr:[]
+        purchase_arr:[],
+        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        page:1
     }
   },
   mounted () {
-      this.purchase_arr = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
+      this.getdata()
   },
   methods: {
+    getdata(){
+        myvideos(this.page,161).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0&&res.data.data.videos.length !=0){
+                this.purchase_arr.push(...res.data.data.videos)
+                this.page = this.page+1
+            }
+            if(res.data.data.videos.length == 0){
+                Toast('没有更多了...')
+            }
+            this.mescrolls.endErr()
+        }).catch(err=>{
+            console.log(err)
+        })
+    },
     back(){
       window.history.go(-1)
     },
     Upload(){
        this.$router.push({ path:'/Upload' })
     },
-    singleGo(arr,index) {
-        localStorage.setItem('Single',JSON.stringify(arr))
-        localStorage.setItem('Single_index',index)
+    singleGo(val) {
+        let num = sessionStorage.getItem('frequency')?Number(sessionStorage.getItem('frequency'))+1:1
+        sessionStorage.setItem('Single'+num,JSON.stringify(val))
+        sessionStorage.setItem('frequency',num)
         this.$router.push({
           path: '/Single_video'
         })
+    },
+    mescrollsInit (mescrolls) {
+        this.mescrolls = mescrolls;
+    },
+    loadDatas(){
+          this.getdata()
     }
   }
 }
@@ -90,7 +122,7 @@ export default {
     display: block;
 }
 .center {
-    padding: 60px 30px;
+    // padding: 60px 30px;
 }
 .center .wonderful_nav {
     width: 100%;
@@ -110,6 +142,9 @@ export default {
     width: 100%;
     height: 595px;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .center .wonderful_nav .wonderful_li .wonderful_img img {
     width: 100%;
@@ -138,5 +173,12 @@ export default {
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	bottom:0px;
+    padding: 20px;
+	height: auto; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

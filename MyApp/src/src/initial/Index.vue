@@ -10,40 +10,11 @@
     </div>
     <swiper :options="AllIndex" ref="AllIndex" @slideChangeTransitionEnd="AllIndexcallback">
       <swiper-slide>
-        <!-- <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
-          <swiper-slide v-for="(item,index) in video_data" :key="index">
-            <video loop>
-              <source :src="item.video" type="video/mp4">
-            </video>
-            <div class="right_nav">
-            <div class="userimg" @click="personalgo()">
-            <img :src="item.userimg" alt="">
-            <span>+</span>
-            </div>
-            <div class="love">
-            <span></span>
-            <span>{{item.love}}</span>
-            </div>
-            <div class="comment">
-            <span></span>
-            <span>{{item.comment}}</span>
-            </div>
-            <div class="share">
-            <span></span>
-            <span>{{item.share}}</span>
-            </div>
-            </div>
-            <div class="information">
-            <div class="username">{{item.username}}</div>
-            <div class="text">{{item.title}}</div>
-            <div class="music">{{item.musicname}}</div>
-            </div>
-          </swiper-slide>
-        </swiper> -->
         <videoplay :video_num="tab_check"></videoplay>
       </swiper-slide>
       <swiper-slide>
-                <div class="nofollow">
+          <followvideo :video_num="tab_check" v-if='!followstatus'></followvideo>
+                <div class="nofollow" v-show='followstatus'>
                     <div class="follow_box">
                         <div class="follow_title">
                             还没有关注人动态
@@ -53,42 +24,20 @@
                         </div>
                     </div>
                     <div class="follow_ul">
-                        <div class="follow_li" @click="personalgo(1)">
+                    <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+                        <div class="follow_li" v-for="(item,index) in notice_arr" :key="index" @click="personalgo(item.id)">
                             <div class="userimg">
-                                <img src="../assets/images/星星.png" alt="">
+                                <img :src="item.headimgurl" alt="">
                             </div>
                             <div class="user">
-                                <div class="username">Tina</div>
-                                <div class="usersex"><span><em class="nv"></em>女</span></div>
+                                <div class="username">{{item.username}}</div>
+                                <div class="usersex"><span><em :class="{nv:item.sex == 2,nan:item.sex == 1}"></em>{{item.sex == 1?'男':'女'}}</span></div>
                                 <div class="usertext">可能认识的人</div>
                             </div>
-                            <div class="follow_btn">关注</div>
-                            <div class="follow_del">x</div>
+                            <div class="follow_btn NO" v-if="item.concerned == null" @click.stop="add_concern(item.id,index)">关注</div>
+                            <div class="follow_btn" v-if="item.concerned != null" @click.stop="del_concern(item.id,index)">已关注</div>
                         </div>
-                        <div class="follow_li" @click="personalgo(2)">
-                            <div class="userimg">
-                                <img src="../assets/images/星星.png" alt="">
-                            </div>
-                            <div class="user">
-                                <div class="username">Tina</div>
-                                <div class="usersex"><span><em class="nv"></em>女</span></div>
-                                <div class="usertext">可能认识的人</div>
-                            </div>
-                            <div class="follow_btn">关注</div>
-                            <div class="follow_del">x</div>
-                        </div>
-                        <div class="follow_li" @click="personalgo(3)">
-                            <div class="userimg">
-                                <img src="../assets/images/星星.png" alt="">
-                            </div>
-                            <div class="user">
-                                <div class="username">Tina</div>
-                                <div class="usersex"><span><em class="nan"></em>男</span></div>
-                                <div class="usertext">可能认识的人</div>
-                            </div>
-                            <div class="follow_btn">关注</div>
-                            <div class="follow_del">x</div>
-                        </div>
+                    </ScrollContent>
                     </div>
                 </div>
       </swiper-slide>
@@ -99,9 +48,12 @@
 
 <script>
 import enquip from '../lib/equipInfo'
-import {register} from '@/api/api'
+import {register,locate,recommendconcerns,addconcern,delconcern,concernvideos} from '@/api/api'
+import { Toast } from 'mint-ui';
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import  videoplay  from '@/components/Video_play'
+import  followvideo  from '@/components/follow_video'
+import ScrollContent from '@/components/ScrollContent'
 import  foot  from '@/components/Foot'
 export default {
   name: "Index",
@@ -109,7 +61,9 @@ export default {
     swiper,
     swiperSlide,
     foot,
-    videoplay
+    videoplay,
+    ScrollContent,
+    followvideo
   },
   data() {
     return {
@@ -121,7 +75,10 @@ export default {
           // 所有的参数同 swiper 官方 api 参数
           // ...
         },
-        a:''
+        notice_arr:[],
+        mescrollValue: {up: true, down: false},
+        page:1,
+        followstatus: false
     };
   },
   computed: {
@@ -133,8 +90,9 @@ export default {
     }
   },
   mounted() {
-    //   this.initialize()
-    //   this.getdata()
+      this.initialize()
+      this.statusfollow()
+      this.getdata()
   },
   methods: {
     initialize() {
@@ -142,32 +100,42 @@ export default {
       document.addEventListener(
         "deviceready",
         function(){
-            console.log(enquip())
+             if(!sessionStorage.getItem('dq')){
+                 let options = {
+                    enableHighAccuracy: true,
+                    maximumAge: 3600000
+                }
+                    
+                let watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+
+                function onSuccess(position) {
+                        locate(position.coords.latitude,position.coords.longitude,position.coords.accuracy,position.timestamp).then(res=>{
+                            if(res.data.resultCode == 0){
+                                sessionStorage.setItem('dq',res.data.data)
+                            }
+                        })
+                };
+
+                function onError(error) {
+                    console.log(111212);
+                    console.log(error);
+                }
+             }
             let a = enquip()
             setTimeout(function(){
-                register(a).then(res=>{
-                    console.log(res)
-                }).catch(err=>{
-                    console.log(err)
-                })
-            },5000)
+                if(!(sessionStorage.getItem('userid'))){
+                    register(a).then(res=>{
+                        console.log(res)
+                        if(res.data.resultCode == 0){
+                            sessionStorage.setItem('userid',res.data.data.userid)
+                        }
+                    }).catch(err=>{
+                        console.log(err)
+                    })
+                }
+            },500)
         }
-      );
-    },
-    getdata(){
-        let a = {
-            sw: 'paCm',
-            sh: 'oKKm',
-            sp: '4',
-            gv: '',
-            gr: '',
-            du: '9KSkr6Kioaf10KL3p6Sgrw'
-        }
-                register(a).then(res=>{
-                    console.log(res)
-                }).catch(err=>{
-                    console.log(err)
-                })  
+      )
     },
     AllIndexcallback(){
       this.tab_check = this.AllIndexswiper.realIndex
@@ -183,6 +151,52 @@ export default {
                  id:id
                  } 
         })
+    },
+    statusfollow(){
+        concernvideos(1).then(res=>{
+            if(res.data.data.videos.length==0){
+                this.followstatus = true
+            }
+        })
+    },
+    getdata(){
+      recommendconcerns(this.page).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0&&res.data.data.members.length != 0){
+                this.notice_arr.push(...res.data.data.members)
+                this.page = this.page + 1
+                console.log(this.notice_arr)
+            }
+            if(res.data.data.members.length == 0){
+                Toast('没有更多了...')
+            }
+            this.mescrolls.endErr()
+        })
+    },
+    add_concern(id,index){
+        console.log(id)
+        addconcern(id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+            this.notice_arr[index].concerned = 0
+                Toast(res.data.message)
+            }
+        })
+    },
+    del_concern(id,index){
+        delconcern(id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+                this.notice_arr[index].concerned = null
+                Toast(res.data.message)
+            }
+        })
+    },
+    mescrollsInit (mescrolls) {
+        this.mescrolls = mescrolls;
+    },
+    loadDatas(){
+          this.getdata()
     }
   }
 };
@@ -302,7 +316,10 @@ export default {
 }
 .nofollow .follow_ul {
     width: 100%;
+    height: 400px;
     overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
 }
 .nofollow .follow_ul .follow_li {
     width: 100%;
@@ -351,12 +368,15 @@ export default {
     width: 130px;
     height: 60px;
     border-radius: 60px;
-    background-color: #ff3841;
+    background-color: #311d20;
     font-size: 30px;
     font-weight: 600;
     text-align: center;
     line-height: 60px;
     margin-right: 40px;
+}
+.nofollow .follow_ul .follow_li .NO {
+    background-color: #ff3841;
 }
 .nofollow .follow_ul .follow_li .follow_del {
     width: 24px;
@@ -369,7 +389,7 @@ export default {
     font-size: 34px;
     font-weight: 500;
     color: #999999;
-    z-index: 2;
+    z-index: 4;
 }
 .top .search {
     width: 44px;
@@ -406,5 +426,11 @@ export default {
     left: 50%;
     bottom: -10px;
     transform: translateX(-50%);
+}
+.mescroll {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+	height: auto; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

@@ -136,7 +136,12 @@ export default {
     font-weight: 600;
 }
 .top .left {
-    width: 46px;
+    width: 19px;
+    height: 36px;
+    background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
+    background-size: 750px 4532px;
+    background-position: -16px -2147px;
+    padding: 0px 20px;
     position: absolute;
     left: 30px;
     top: 50%;

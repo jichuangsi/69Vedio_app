@@ -8,12 +8,11 @@
         <div>》</div>
       </div>
       <div class="box">
-        <div class="user_li">
-          <div class="zm">a</div>
+        <div class="user_li" v-for="(item,index) in friends_arr" :key="index" @click="personalgo(item.id)">
           <div class="user">
             <span></span>
-            <img src="../assets/images/首页 (2) (1).png" alt="">
-            <div>ation</div>
+            <img :src="item.headimgurl" alt="">
+            <div>{{item.username}}</div>
           </div>
         </div>
       </div>
@@ -21,15 +20,28 @@
 </template>
 
 <script>
+import {getfriends} from '@/api/api'
 export default {
   name: 'friend',
   data() {
     return {
+      friends_arr:[]
     }
   },
   mounted () {
+    this.getdata()
   },
   methods: {
+    getdata(){
+      getfriends().then(res=>{
+        if(res.data.resultCode == 0){
+          this.friends_arr = res.data.data.members
+        }
+      })
+    },
+    personalgo(id){
+        this.$router.push({ path:'/personal',query:{id:id} })
+    },
   }
 }
 </script>
@@ -77,6 +89,7 @@ export default {
   width: 100%;
   font-size: 26px;
   color: #999;
+  padding: 20px 0px;
 }
 .box .user_li .zm {
   margin-bottom: 10px;

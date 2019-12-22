@@ -10,10 +10,12 @@
             <span>69短视频</span>
         </div>
         <div class="ewm">
-            <img src="../assets/images/ewm.jpg" alt="">
+            <canvas id="QRCode"></canvas>
         </div>
-        <div class="ipt" @click="fz">
-            {{url}}
+        <div class="ipt" v-clipboard:copy="QRCodeMsg" 
+        v-clipboard:success="copy" 
+        v-clipboard:error="onError">
+            {{QRCodeMsg}}
             <span>复制</span>
         </div>
         <div class="ts">
@@ -24,22 +26,48 @@
 </template>
 
 <script>
+import {sharelink} from '@/api/api'
+import QRCode from "qrcode"
+import { Toast } from 'mint-ui';
 export default {
   name: 'Extension',
   data() {
     return {
-        url:'http://huaban.com/pins/2862628599'
+        QRCodeMsg: "",
+    }
+  },
+  watch: {
+    // 通过监听获取数据
+    QRCodeMsg(val) {
+      // 获取页面的canvas
+      var msg = document.getElementById("QRCode");
+      // 将获取到的数据（val）画到msg（canvas）上
+      QRCode.toCanvas(msg, val, function(error) {
+        console.log(error);
+      });
     }
   },
   mounted () {
+      this.getdata()
   },
   methods: {
+      getdata(){
+          sharelink().then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0){
+                  this.QRCodeMsg = res.data.data
+              }
+          })
+      },
     back(){
       window.history.go(-1)
     },
-      fz(){
-          window.clipboardData.setData("Text",this.url);
-      }
+    copy(e) {
+        Toast('复制成功')
+    },
+    onError(e) {
+        Toast('复制失败')
+    }
   }
 }
 </script>
@@ -101,8 +129,11 @@ export default {
         margin-top: 40px;
         margin-bottom: 80px;
         padding: 68px 125px;
-        img {
-            width: 100%;
+        canvas {
+            width: 300px !important;
+            height: 300px !important;
+            display: block;
+            margin: 0 auto;
         }
     }
     .ipt {

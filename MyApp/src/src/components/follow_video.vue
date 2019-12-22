@@ -1,14 +1,14 @@
 <template>
-    <div class="Video_play">
+    <div class="follow_video">
         <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
           <swiper-slide v-for="(item,index) in video_data" :key="index">
-            <video class="video_t" loop :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
+            <video class="video_f" loop :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
               <source :src="item.url" type="video/mp4">
             </video>
             <div class="right_nav">
             <div class="userimg" @click="personalgo(item.id)">
             <img :src="item.headimgurl" alt="">
-            <span v-if="item.user_id != 0">+</span>
+            <span v-if="item.id">+</span>
             </div>
             <div class="love" :class="{love_check:item.isgood != 0}" @click="love(item,index)">
             <span></span>
@@ -91,12 +91,12 @@
 </template>
 
 <script>
-import {homevideo ,videocollection,cancelcollection,getcomments,submitcomment} from '@/api/api'
+import {concernvideos ,videocollection,cancelcollection,getcomments,submitcomment} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
 export default {
-  name: 'Video_play',
+  name: 'follow_video',
   components: {
     swiper,
     swiperSlide,
@@ -113,7 +113,7 @@ export default {
         direction : 'vertical',
         height : window.innerHeight,
         observer: true,
-        initialSlide:sessionStorage.getItem('recommend_videoIndex')?sessionStorage.getItem('recommend_videoIndex'):0
+        initialSlide:sessionStorage.getItem('follow_videoIndex')?sessionStorage.getItem('follow_videoIndex'):0
       },
       video_arr: [],
       video_check:'',
@@ -134,9 +134,13 @@ export default {
   },
   watch: {
       video_num(newval,oldval){
-          if(newval == 1){
+          console.log(newval)
+          console.log(this.video_check)
+          if(newval == 0){
+              console.log(3333)
               this.video_check.pause()
           }else{
+              console.log(222)
               this.video_check.play()
           }
       }
@@ -148,12 +152,12 @@ export default {
   },
   mounted () {
       let self = this
-    if(sessionStorage.getItem('recommend_video')){
-        self.video_data = JSON.parse(sessionStorage.getItem('recommend_video'))
+    if(sessionStorage.getItem('follow_video')){
+        self.video_data = JSON.parse(sessionStorage.getItem('follow_video'))
          setTimeout(function(){
-            self.video_arr = document.getElementsByClassName('video_t')
-            self.video_arr[sessionStorage.getItem('recommend_videoIndex')].play()
-            self.video_check = self.video_arr[sessionStorage.getItem('recommend_videoIndex')]
+            self.video_arr = document.getElementsByClassName('video_f')
+            self.video_arr[sessionStorage.getItem('follow_videoIndex')].play()
+            self.video_check = self.video_arr[sessionStorage.getItem('follow_videoIndex')]
         },500)
     }else{
         self.getdata(0)
@@ -162,16 +166,15 @@ export default {
   methods: {
       getdata(index){
           let self = this
-        homevideo(self.pageIndex).then(res=>{
+        concernvideos(self.pageIndex).then(res=>{
             console.log(res)
             if(res.data.resultCode == 0&&res.data.data.videos.length!=0){
                 self.video_data.push(...res.data.data.videos)
-                self.pageIndex = res.data.data.page + 1
-                console.log(self.pageIndex)
-                sessionStorage.setItem('recommend_video',JSON.stringify(self.video_data))
-                sessionStorage.setItem('recommend_videoIndex',index)
+                self.pageIndex = self.pageIndex + 1
+                sessionStorage.setItem('follow_video',JSON.stringify(self.video_data))
+                sessionStorage.setItem('follow_videoIndex',index)
                 setTimeout(function(){
-                    self.video_arr = document.getElementsByClassName('video_t')
+                    self.video_arr = document.getElementsByClassName('video_f')
                     self.video_arr[index].play()
                     self.video_check = self.video_arr[index]
                 },500)
@@ -181,22 +184,20 @@ export default {
       love(val,index){
           if(val.isgood == 0){
               videocollection(val.id).then(res=>{
-                  console.log(res)
                   if(res.data.resultCode == 0){
                       Toast(res.data.message)
                       this.video_data[index].isgood = 1
                       this.video_data[index].good = this.video_data[index].good + 1
-                      sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
+                      sessionStorage.setItem('follow_video',JSON.stringify(this.video_data))
                   }
               })
           }else{
               cancelcollection(val.id).then(res=>{
-                  console.log(res)
                   if(res.data.resultCode == 0){
                       Toast(res.data.message)
                       this.video_data[index].isgood = 0
                       this.video_data[index].good = this.video_data[index].good - 1
-                      sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
+                      sessionStorage.setItem('follow_video',JSON.stringify(this.video_data))
                   }
               })
           }
@@ -208,7 +209,7 @@ export default {
             if(this.Recommendswiper.realIndex == i){
                 this.video_arr[i].play()
                 this.video_check =this.video_arr[i]
-                sessionStorage.setItem('recommend_videoIndex',this.Recommendswiper.realIndex)
+                sessionStorage.setItem('follow_videoIndex',this.Recommendswiper.realIndex)
             }else{
                 this.video_arr[i].pause()
             }
@@ -336,10 +337,9 @@ export default {
 }
 .right_nav div img {
     width: 70px;
+    height: 70px;
 }
 .right_nav .userimg img {
-    width: 70px;
-    height: 70px;
     background-color: #fff;
     border-radius: 50%;
 }
@@ -395,7 +395,6 @@ export default {
 .information .username {
     font-size: 36px;
 }
-
 
 .bottom_box {
     width: 100%;

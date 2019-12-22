@@ -7,19 +7,19 @@
     </div>
         <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
           <swiper-slide v-for="(item,index) in video_data" :key="index">
-            <video loop :poster="item.posterimg">
-              <source :src="item.video" type="video/mp4">
+            <video loop :poster="item.thumbnail">
+              <source :src="item.url" type="video/mp4">
             </video>
             <div class="right_nav">
-            <div class="userimg" @click="personalgo(item,index)">
-            <img :src="item.userimg" alt="">
-            <span>+</span>
+            <div class="userimg" @click="personalgo(item.id)">
+            <img :src="item.headimgurl" alt="">
+            <span v-if="item.id != 0">+</span>
             </div>
-            <div class="love" :class="{love_check:lovelist.indexOf(index)!=-1}" @click="love(index)">
+            <div class="love" :class="{love_check:item.isgood != 0}" @click="love(item,index)">
             <span></span>
-            <span>{{item.love}}</span>
+            <span>{{item.good}}</span>
             </div>
-            <div class="comment">
+            <div class="comment" @click="commentclick(item.id,item.user_id)">
             <span></span>
             <span>{{item.comment}}</span>
             </div>
@@ -35,16 +35,77 @@
             </div>
           </swiper-slide>
         </swiper>
+    <div class="bj" v-if="bottom_check">
+        <div class="bottom_box" :class="{bottom_check:bottom_check}">
+            <div class="bottom_top">
+                <div class="title">评论<span class="fr" @click="close">x</span></div>
+            </div>
+            <div class="center">
+                <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+                <div class="li" v-for="(item,index) in f_arr" :key="index">
+                    <div class="img">
+                        <img :src="item.sheadimgurl" alt="">
+                    </div>
+                    <div class="message">
+                        <div class="username" @click="hqclick(item.snickname,item.cid,item.sid)">
+                            {{item.snickname}}
+                        </div>
+                        <div class="text">
+                            {{item.content}}
+                            <span class="time">{{item.add_time}}</span>
+                        </div>
+                        <div class="next_center" v-if="item.c_status">
+                            <div class="li">
+                                <div class="img">
+                                    <img :src="item.children.sheadimgurl" alt="">
+                                </div>
+                                <div class="message">
+                                    <div class="username" @click="hqclick(item.children.snickname,item.children.cid,item.children.sid)">{{item.children.snickname}}</div>
+                                    <div class="text">
+                                        {{item.children.content}}
+                                        <span class="time">{{item.children.add_time}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="next_center" v-if="!item.c_status" v-for="(val,i) in item.children" :key="i">
+                            <div class="li">
+                                <div class="img">
+                                    <img :src="val.sheadimgurl" alt="">
+                                </div>
+                                <div class="message">
+                                    <div class="username" @click="hqclick(val.snickname,val.cid,val.sid)">{{val.snickname}}</div>
+                                    <div class="text">
+                                        {{val.content}}
+                                        <span class="time">{{val.add_time}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="more" v-if="item.status" @click="more(item.cid,index)">一展开评论</div>
+                    </div>
+                </div>
+                </ScrollContent>
+            </div>
+            <div class="ipt">
+                <div>@{{sendname}}</div><input type="text" v-model="conntent"><span @click="send">发送</span>
+            </div>
+        </div>
+    </div>
     </div>
 </template>
 
 <script>
+import {videocollection,cancelcollection,getcomments,submitcomment} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'Single_video',
   components: {
     swiper,
-    swiperSlide
+    swiperSlide,
+    ScrollContent
   },
   data() {
     return {
@@ -52,13 +113,23 @@ export default {
         direction : 'vertical',
         height : window.innerHeight,
         observer: true,
-        initialSlide:localStorage.getItem('Single_index')
+        initialSlide:sessionStorage.getItem('Single_index')
       },
       video_arr: [],
       video_check:'',
       video_data:[],
       video_index:0,
-      lovelist:''
+      bottom_check:false,
+      message_index:1,
+      c_index:1,
+      f_arr:[],
+      c_arr:[],
+      id:'',
+        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        sendname:'',
+        conntent:'',
+        userid:'',
+        pid:''
     }
   },
   computed: {
@@ -68,26 +139,15 @@ export default {
   },
   mounted () {
     let self = this
+    self.video_data = [JSON.parse(sessionStorage.getItem('Single'+sessionStorage.getItem('frequency')))]
     console.log(self.video_data)
-    self.video_data = JSON.parse(localStorage.getItem('Single'))
-    self.video_index = localStorage.getItem('Single_index')
-
     setTimeout(function(){
         self.video_arr = document.getElementsByTagName('video')
-        self.video_arr[self.video_index].play()
-        self.video_check = self.video_arr[self.video_index]
+        self.video_arr[0].play()
+        self.video_check = self.video_arr[0]
     },500)
   },
   methods: {
-      love(index){
-        if(this.lovelist.indexOf(index)!=-1){
-            this.lovelist = this.lovelist.split(index)[0]+ this.lovelist.split(index)[0]
-            this.video_data[index].love = Number(this.video_data[index].love)-1
-        }else{
-            this.video_data[index].love = Number(this.video_data[index].love)+1
-            this.lovelist += index
-        }
-      },
     Recommendcallback(){
         console.log(this.Recommendswiper.realIndex)
         this.video_index = this.Recommendswiper.realIndex
@@ -100,21 +160,123 @@ export default {
             }
         }
     },
-    personalgo(val,index){
-        localStorage.setItem('Single_index',this.video_index)
-        this.$router.push({
+    personalgo(val){
+        if(val != 0){
+            this.$router.push({
              path:'/personal',
              query:{
-                 id:index+1,
-                 userimg:val.userimg,
-                 username:val.username
+                 id:val
                  } 
             })
+        }
     },
     back(){
       window.history.go(-1)
+      sessionStorage.setItem('frequency',Number(sessionStorage.getItem('frequency'))-1)
+    },
+      love(val,index){
+          if(val.isgood == 0){
+          console.log(val.id)
+              videocollection(val.id).then(res=>{
+                  console.log(res)
+                  if(res.data.resultCode == 0){
+                      Toast(res.data.message)
+                      this.video_data[index].isgood = 1
+                      this.video_data[index].good = this.video_data[index].good + 1
+                      sessionStorage.setItem('Single'+sessionStorage.getItem('frequency'),JSON.stringify(this.video_data))
+                  }
+              })
+          }else{
+              cancelcollection(val.id).then(res=>{
+                  console.log(res)
+                  if(res.data.resultCode == 0){
+                      Toast(res.data.message)
+                      this.video_data[index].isgood = 0
+                      this.video_data[index].good = this.video_data[index].good - 1
+                      sessionStorage.setItem('Single'+sessionStorage.getItem('frequency'),JSON.stringify(this.video_data))
+                  }
+              })
+          }
+      },
+      
+    getmassage(){
+        getcomments(this.id,this.message_index).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0&&res.data.data.comments.length !=0){
+                for(let i =0;i<res.data.data.comments.length;i++){
+                    if(res.data.data.comments[i].children){
+                        res.data.data.comments[i].status = true
+                        res.data.data.comments[i].c_status = true
+                    }
+                }
+                this.f_arr.push(...res.data.data.comments)
+                this.message_index = this.message_index+1
+            }
+            if(res.data.data.comments.length == 0){
+                Toast('没有更多了...')
+            }
+            this.mescrolls.endErr()
+        })
+    },
+    commentclick(id,userid){
+        document.getElementsByClassName('swiper-container')[0].style.zIndex = 3
+        this.bottom_check = true
+        this.id = id
+        this.userid = userid
+        this.getmassage()
+    }, 
+    close(){
+        this.bottom_check = false
+        this.f_arr = []
+        this.c_arr = []
+        this.message_index = 1
+        this.c_index = 1
+        document.getElementsByClassName('swiper-container')[0].style.zIndex = 1
+    },
+    mescrollsInit (mescrolls) {
+        this.mescrolls = mescrolls;
+    },
+    loadDatas(){
+        this.getmassage()
+    },
+    more(id,index){
+        getcomments(this.id,this.c_index,id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0&&res.data.data.comments.length !=0){
+                this.f_arr[index].children = this.f_arr[index].children.length?this.f_arr[index].children:[]
+                this.f_arr[index].children.push(...res.data.data.comments)
+                this.c_index = this.c_index+1
+                this.f_arr[index].c_status = false
+            }
+            if(res.data.data.comments.length == 0){
+                this.f_arr[index].status = false
+            }
+        })
+    },
+    hqclick(name,pid,sid){
+        this.sendname = name
+        this.userid = sid
+        this.pid = pid
+    },
+    send(){
+        if(this.conntent != ''){
+            let val = this.conntent
+            this.conntent = ''
+            submitcomment(this.id,val,this.userid,this.pid).then(res=>{
+                console.log(res)
+                Toast(res.data.message)
+                if(res.data.resultCode==0){
+                    this.sendname = ''
+                    this.pid = ''
+                    this.close()
+                }
+            })
+        }
     }
-  }
+  },
+    beforeDestroy () {
+        // sessionStorage.removeItem('Single'+sessionStorage.getItem('frequency'))
+    }
 }
 </script>
 
@@ -190,6 +352,8 @@ export default {
     width: 70px;
 }
 .right_nav .userimg img {
+    width: 70px;
+    height: 70px;   
     background-color: #fff;
     border-radius: 50%;
 }
@@ -244,5 +408,118 @@ export default {
 }
 .information .username {
     font-size: 36px;
+}
+.bottom_box {
+    width: 100%;
+    background-color: #fff;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    transform: translateY(100%);
+}
+.bottom_check {
+    transform: translateY(0%)
+}
+.bottom_box .bottom_top {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 46px;
+}
+.bottom_box .bottom_top span {
+    margin-right: 20px;
+}
+.bottom_box .center {
+    width: 100%;
+    padding: 20px;
+    height: 600px;
+    overflow-y: auto;
+    line-height: 36px;
+    position: relative;
+}
+.bottom_box .li {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0px;
+} 
+.bottom_box .li .img {
+    width: 80px;
+    height: 80px;
+}
+.bottom_box .next_center .li .img {
+    width: 70px;
+    height: 70px;
+}
+.bottom_box .li .img img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+.bottom_box .li .message {
+    flex: 1;
+    padding: 0px 20px;
+    font-size: 28px;
+}
+.bottom_box .li .message .username {
+    color: #999;
+    margin-bottom: 10px;
+}
+.bottom_box .li .time{
+    font-size: 26px;
+    color:#999;
+}
+.bottom_box .li .more {
+    margin-top: 20px;
+    color: #999;
+}
+.bottom_box .ipt {
+    width: 100%;
+    height: 56px;
+    line-height: 56px;
+    display: flex;
+    padding:0px 20px;
+    input {
+        flex: 1;
+        background-color: #99999954 !important;
+        border-radius: 56px;
+        font-size: 30px;
+        padding: 0px 20px;
+    }
+    span {
+        margin-left: 20px;
+    }
+}
+.bj {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background-color: rgba(0,0,0,0.3);
+    z-index: 999;
+}
+.bj .btn {
+    font-size: 32px;
+    display: flex;
+    line-height: 56px;
+    border-bottom: 1px solid #0094ff;
+}
+.bj .btn div {
+    flex: 1;
+    text-align: center;
+    color: #0094ff;
+}
+.bj .btn div:first-child {
+    border-right: 1px solid #0094ff;
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	top:0px;
+    padding: 20px;
+	height: auto; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

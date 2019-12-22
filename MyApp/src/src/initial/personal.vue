@@ -10,49 +10,50 @@
     <div class="center">
         <div class="user">
             <div class="userimg">
-                <img :src="userimg" alt="">
+                <img :src="fileimg" alt="">
                 <div class="user_box">
-                    <div class="username">{{username}}</div>
-                    <div class="usersex">账户：545454136323</div>
-                    <div class="usertext">广州市 25岁</div>
+                    <div class="username">{{nickname}}</div>
+                    <div class="usersex">账户：{{username}}</div>
+                    <div class="usertext">{{region}} {{year}}岁</div>
                 </div>
             </div>
-            <div class="follow_btn">关注</div>
-            <div class="user_btn">私信</div>
+            <div class="follow_btn NO" v-if="concerned == null" @click.stop="add_concern()">关注</div>
+            <div class="follow_btn" v-if="concerned != null" @click.stop="del_concern()">已关注</div>
+            <div class="user_btn" :class="{NO:concerned != null}">私信</div>
         </div>
         <div class="synopsis">
             个人简介 <span>(100字以内)</span>
         </div>
         <div class="textare">
-
+            {{introduce}}
         </div>
         <div class="num">
-            <div>
-                <span>156</span>
+            <div @click="follow_go(1)">
+                <span>{{fansnum}}</span>
                 粉丝
             </div>
-            <div>
-                <span>156</span>
+            <div @click="follow_go(0)">
+                <span>{{follownum}}</span>
                 关注
             </div>
             <div>
-                <span>156</span>
+                <span>{{fabulous}}</span>
                 被赞
             </div>
         </div>
         <div class="tab_nav">
             <div :class="{tab_check:tab_check == 0}" @click="tabclick(0)">作品<em></em></div>
             <div :class="{tab_check:tab_check == 1}" @click="tabclick(1)">喜欢<em></em></div>
-            <div :class="{tab_check:tab_check == 2}" @click="tabclick(2)">购买<em></em></div>
         </div>
         <swiper :options="tab_my" ref="tab_my" @slideChangeTransitionEnd="tab_mycallback">
             <swiper-slide>
+                <ScrollContent ref="myscrollfull" @load="works_loadDatas" :mescrollValue="works_mescrollValue" @init="works_mescrollsInit">
                     <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in works_arr" :key="index">
+                        <div class="wonderful_li" v-for="(item,index) in works_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
-                                <img :src="item.posterimg" alt="">
+                                <img :src="item.thumbnail" alt="">
                                 <div class="userimg">
-                                    <img :src="item.userimg" alt="">
+                                    <img :src="item.headimgurl" alt="">
                                 </div>
                             </div>
                             <div class="wonderful_text">
@@ -60,14 +61,16 @@
                             </div>
                         </div>
                     </div>
+                </ScrollContent>
             </swiper-slide>
             <swiper-slide>
+                <ScrollContent ref="myscrollfull" @load="love_loadDatas" :mescrollValue="love_mescrollValue" @init="love_mescrollsInit">
                     <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in love_arr" :key="index">
+                        <div class="wonderful_li" v-for="(item,index) in love_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
-                                <img :src="item.img" alt="">
+                                <img :src="item.thumbnail" alt="">
                                 <div class="userimg">
-                                    <img :src="item.userimg" alt="">
+                                    <img :src="item.headimgurl" alt="">
                                 </div>
                             </div>
                             <div class="wonderful_text">
@@ -75,21 +78,7 @@
                             </div>
                         </div>
                     </div>
-            </swiper-slide>
-            <swiper-slide>
-                    <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index">
-                            <div class="wonderful_img">
-                                <img :src="item.img" alt="">
-                                <div class="userimg">
-                                    <img :src="item.userimg" alt="">
-                                </div>
-                            </div>
-                            <div class="wonderful_text">
-                                {{item.title}}
-                            </div>
-                        </div>
-                    </div>
+                </ScrollContent>
             </swiper-slide>
         </swiper>
     </div>
@@ -97,12 +86,16 @@
 </template>
 
 <script>
+import {mylike,myvideos,getmemberinfo,addconcern,delconcern} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'personal',
   components: {
     swiper,
     swiperSlide,
+    ScrollContent
   },
   data() {
     return {
@@ -118,8 +111,23 @@ export default {
         ],
         love_arr:[
         ],
-        purchase_arr:[
-        ]
+        works_index:1,
+        love_index:1,
+        works_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        love_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        username:'',
+        nickname:'',
+        introduce:'',
+        sex:'',
+        birthday:'',
+        fileimg:'',
+        region:'',
+        year:'',
+        fansnum:'',
+        follownum:'',
+        money:'',
+        fabulous:'',
+        concerned:''
     }
   },
   computed: {
@@ -128,13 +136,75 @@ export default {
     }
   },
   mounted () {
-      console.log(this.$route.query.userimg)
-      console.log(this.$route.query.username)
-      console.log(this.$route.query.id)
-      this.userimg = this.$route.query.userimg?this.$route.query.userimg:require('../assets/images/星星.png')
-      this.username = this.$route.query.username?this.$route.query.username:'爱笑的女孩'
+      this.getdata()
   },
   methods: {
+      getdata(){
+          getmemberinfo(this.$route.query.id).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0){
+                this.username = res.data.data.username
+                this.nickname = res.data.data.nickname
+                this.introduce = res.data.data.introduce
+                this.sex = res.data.data.sex == 1?'男':'女'
+                this.birthday = res.data.data.birthday
+                this.fileimg = res.data.data.headimgurl
+                this.region = res.data.data.regionname
+                this.year = res.data.data.year
+                this.fansnum = res.data.data.fansnum
+                this.follownum = res.data.data.follownum
+                this.money = res.data.data.money
+                this.fabulous = res.data.data.fabulous
+                this.concerned = res.data.data.concerned
+              }
+          })
+          this.getMylove()
+          this.getMyvideo()
+      },
+    add_concern(){
+        addconcern(this.$route.query.id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+            this.concerned = 0
+                Toast(res.data.message)
+            }
+        })
+    },
+    del_concern(){
+        delconcern(this.$route.query.id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+                this.concerned = null
+                Toast(res.data.message)
+            }
+        })
+    },
+    getMylove(){
+          mylike(this.love_index,161).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                this.love_arr.push(...res.data.data.videos)
+                this.love_index = this.love_index+1
+              }
+                if(res.data.data.videos.length == 0){
+                    Toast('没有更多了...')
+                }
+                this.love_mescrolls.endErr()
+          })    
+    },
+    getMyvideo(){
+          myvideos(this.works_index,161).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                this.works_arr.push(...res.data.data.videos)
+                this.works_index = this.works_index+1
+              }
+                if(res.data.data.videos.length == 0){
+                    Toast('没有更多了...')
+                }
+                this.works_mescrolls.endErr()
+          })
+    },
     back(){
       window.history.go(-1)
     },
@@ -144,7 +214,36 @@ export default {
     tabclick(index){
         this.tab_check = index
         this.tab_myswiper.slideTo(index)
-    }
+    },
+    singleGo(val) {
+        let num = sessionStorage.getItem('frequency')?Number(sessionStorage.getItem('frequency'))+1:1
+        sessionStorage.setItem('Single'+num,JSON.stringify(val))
+        sessionStorage.setItem('frequency',num)
+        this.$router.push({
+          path: '/Single_video'
+        })
+    },
+    works_mescrollsInit (mescrolls) {
+        this.works_mescrolls = mescrolls;
+    },
+    works_loadDatas(){
+        this.getMyvideo()
+    },
+    love_mescrollsInit (mescrolls) {
+        this.love_mescrolls = mescrolls;
+    },
+    love_loadDatas(){
+        this.getMylove()
+    },
+    follow_go(index){
+        this.$router.push({
+          path: '/follow',
+          query: {
+            index: index,
+            my:1
+          }
+        })
+    },
   }
 }
 </script>
@@ -219,10 +318,13 @@ export default {
     font-weight: 600;
     text-align: center;
     line-height: 60px;
-    background-color: #ff3841;
+    background-color: #999999;
     color: #fff;
     margin-right: 20px;
     margin-top: 20px;
+}
+.center .user .NO {
+    background-color: #ff3841;
 }
 .center .user .user_btn {
     width: 130px;
@@ -385,11 +487,15 @@ export default {
     width: 100%;
     height: 595px;
     position: relative;
+    background-color: #221010;
 }
 .center .wonderful_nav .wonderful_li .wonderful_img img {
     width: 100%;
-    height: 100%;
     display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
 }
 .center .wonderful_nav .wonderful_li .wonderful_img .userimg {
     width: 40px;
@@ -397,6 +503,8 @@ export default {
     position: absolute;
     bottom: 10px;
     left: 10px;
+    border-radius: 50%;
+    overflow: hidden;
 }
 .center .wonderful_nav .wonderful_li .wonderful_text{
     width: 90%;

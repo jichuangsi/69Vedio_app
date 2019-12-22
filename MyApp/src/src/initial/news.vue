@@ -7,7 +7,11 @@
             <div :class="{tab_check:tab_check == 0}" @click="tabclick(0)">通知<em></em></div>
             <div :class="{tab_check:tab_check == 1}" @click="tabclick(1)">附近<em></em></div>
             <div :class="{tab_check:tab_check == 2}" @click="tabclick(2)">好友<em></em></div>
-            <div class="add">添加好友</div>
+            <div class="add">
+                <router-link to="searchUser">
+                    添加关注
+                </router-link>
+            </div>
         </div>
         <swiper :option="news" ref="news" @slideChangeTransitionEnd="newscallback">
             <swiper-slide>

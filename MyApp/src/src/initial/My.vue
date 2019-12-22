@@ -6,14 +6,18 @@
     <div class="center">
         <div class="user">
             <div class="userimg">
-                <img src="../assets/images/星星.png" alt="">
+                <img :src="fileimg" alt="">
             </div>
             <div class="user_box">
-                <div class="username">爱笑的女孩</div>
-                <div class="usersex">账户：545454136323</div>
-                <div class="usertext">广州市 25岁</div>
+                <div class="username">{{nickname}}</div>
+                <div class="usersex">账户：{{username}}</div>
+                <div class="usertext">{{region}} {{year}}岁</div>
             </div>
-            <div class="user_btn">编辑</div>
+            <div class="user_btn">
+                <router-link to="edit">
+                    编辑
+                </router-link>
+            </div>
         </div>
         <div class="watch">
             剩余观看次数：<span>8</span>/10
@@ -22,23 +26,23 @@
             个人简介 <span>(100字以内)</span>
         </div>
         <div class="textare">
-
+            {{introduce}}
         </div>
         <div class="num">
             <div @click="follow_go(1)">
-                <span>156</span>
+                <span>{{fansnum}}</span>
                 粉丝
             </div>
             <div @click="follow_go(0)">
-                <span>156</span>
+                <span>{{follownum}}</span>
                 关注
             </div>
             <div>
-                <span>156</span>
+                <span>{{fabulous}}</span>
                 被赞
             </div>
             <div>
-                <span>156</span>
+                <span>{{money}}</span>
                 金币
             </div>
         </div>
@@ -89,12 +93,13 @@
         </div>
         <swiper :options="tab_my" ref="tab_my" @slideChangeTransitionEnd="tab_mycallback">
             <swiper-slide>
+                <ScrollContent ref="myscrollfull" @load="works_loadDatas" :mescrollValue="works_mescrollValue" @init="works_mescrollsInit">
                     <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in works_arr" :key="index" @click="singleGo(works_arr,index)">
+                        <div class="wonderful_li" v-for="(item,index) in works_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
-                                <img :src="item.posterimg" alt="">
+                                <img :src="item.thumbnail" alt="">
                                 <div class="userimg">
-                                    <img :src="item.userimg" alt="">
+                                    <img :src="item.headimgurl" alt="">
                                 </div>
                             </div>
                             <div class="wonderful_text">
@@ -102,14 +107,16 @@
                             </div>
                         </div>
                     </div>
+                </ScrollContent>
             </swiper-slide>
             <swiper-slide>
+                <ScrollContent ref="myscrollfull" @load="love_loadDatas" :mescrollValue="love_mescrollValue" @init="love_mescrollsInit">
                     <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in love_arr" :key="index" @click="singleGo(works_arr,index)">
+                        <div class="wonderful_li" v-for="(item,index) in love_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
-                                <img :src="item.posterimg" alt="">
+                                <img :src="item.thumbnail" alt="">
                                 <div class="userimg">
-                                    <img :src="item.userimg" alt="">
+                                    <img :src="item.headimgurl" alt="">
                                 </div>
                             </div>
                             <div class="wonderful_text">
@@ -117,14 +124,15 @@
                             </div>
                         </div>
                     </div>
+                </ScrollContent>
             </swiper-slide>
             <swiper-slide>
                     <div class="wonderful_nav">
-                        <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(works_arr,index)">
+                        <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
-                                <img :src="item.posterimg" alt="">
+                                <img :src="item.thumbnail" alt="">
                                 <div class="userimg">
-                                    <img :src="item.userimg" alt="">
+                                    <img :src="item.headimgurl" alt="">
                                 </div>
                             </div>
                             <div class="wonderful_text">
@@ -140,14 +148,18 @@
 </template>
 
 <script>
+import {myvideos,mylike,getmemberinfo} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import  foot  from '@/components/Foot'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'My',
   components: {
     swiper,
     swiperSlide,
-    foot
+    foot,
+    ScrollContent
   },
   data() {
     return {
@@ -159,7 +171,24 @@ export default {
         },
         works_arr:[],
         love_arr:[],
-        purchase_arr:[]
+        purchase_arr:[],
+        works_index:1,
+        love_index:1,
+        purchase_index:1,
+        works_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        love_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        username:'',
+        nickname:'',
+        introduce:'',
+        sex:'',
+        birthday:'',
+        fileimg:'',
+        region:'',
+        year:'',
+        fansnum:'',
+        follownum:'',
+        money:'',
+        fabulous:''
     }
   },
   computed: {
@@ -168,9 +197,73 @@ export default {
     }
   },
   mounted () {
-      this.works_arr = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
+      this.getdata()
   },
   methods: {
+      getdata(){
+          if(!sessionStorage.getItem('user')){
+              getmemberinfo(165).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0){
+                this.username = res.data.data.username
+                this.nickname = res.data.data.nickname
+                this.introduce = res.data.data.introduce
+                this.sex = res.data.data.sex == 1?'男':'女'
+                this.birthday = res.data.data.birthday
+                this.fileimg = res.data.data.headimgurl
+                this.region = res.data.data.regionname
+                this.year = res.data.data.year
+                this.fansnum = res.data.data.fansnum
+                this.follownum = res.data.data.follownum
+                this.money = res.data.data.money
+                this.fabulous = res.data.data.fabulous
+                sessionStorage.setItem('user',JSON.stringify(res.data.data))
+              }
+          })
+          }else{
+              let user = JSON.parse(sessionStorage.getItem('user'))
+                this.username = user.username
+                this.nickname = user.nickname
+                this.introduce = user.introduce
+                this.sex = user.sex == 1?'男':'女'
+                this.birthday = user.birthday
+                this.fileimg = user.headimgurl
+                this.region = user.regionname
+                this.year = user.year
+                this.fansnum = user.fansnum
+                this.follownum = user.follownum
+                this.money = user.money
+                this.fabulous = user.fabulous
+          }
+          this.getMylove()
+          this.getMyvideo()
+      },
+    getMylove(){
+          mylike(this.love_index,161).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                this.love_arr.push(...res.data.data.videos)
+                this.love_index = this.love_index+1
+              }
+                if(res.data.data.videos.length == 0){
+                    Toast('没有更多了...')
+                }
+                this.love_mescrolls.endErr()
+          })    
+    },
+    getMyvideo(){
+          myvideos(this.works_index,161).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                this.works_arr.push(...res.data.data.videos)
+                this.works_index = this.works_index+1
+              }
+                if(res.data.data.videos.length == 0){
+                    Toast('没有更多了...')
+                }
+                this.works_mescrolls.endErr()
+          })
+    },
     tab_mycallback(){
         this.tab_check = this.tab_myswiper.realIndex
     },
@@ -182,22 +275,42 @@ export default {
         this.$router.push({
           path: '/follow',
           query: {
-            index: index
+            index: index,
+            my:0
           }
         })
     },
-    singleGo(arr,index) {
-        localStorage.setItem('Single',JSON.stringify(arr))
-        localStorage.setItem('Single_index',index)
+    singleGo(val) {
+        let num = sessionStorage.getItem('frequency')?Number(sessionStorage.getItem('frequency'))+1:1
+        sessionStorage.setItem('Single'+num,JSON.stringify(val))
+        sessionStorage.setItem('frequency',num)
         this.$router.push({
           path: '/Single_video'
         })
+    },
+    works_mescrollsInit (mescrolls) {
+        this.works_mescrolls = mescrolls;
+    },
+    works_loadDatas(){
+        this.getMyvideo()
+    },
+    love_mescrollsInit (mescrolls) {
+        this.love_mescrolls = mescrolls;
+    },
+    love_loadDatas(){
+        this.getMylove()
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+.swiper-slide {
+    position: relative;
+    height: 750px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 .top {
     width: 100%;
     height: 152px;
@@ -220,6 +333,7 @@ export default {
 }
 .center .user .userimg {
     width: 160px;
+    height: 160px;
     margin-right: 26px;
     background-color: #fff;
     border-radius: 50%;
@@ -426,10 +540,13 @@ export default {
     width: 100%;
     height: 595px;
     position: relative;
+    background-color: #221010;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .center .wonderful_nav .wonderful_li .wonderful_img img {
     width: 100%;
-    height: 100%;
     display: block;
 }
 .center .wonderful_nav .wonderful_li .wonderful_img .userimg {
@@ -438,6 +555,8 @@ export default {
     position: absolute;
     bottom: 10px;
     left: 10px;
+    border-radius: 50%;
+    overflow: hidden;
 }
 .center .wonderful_nav .wonderful_li .wonderful_text{
     width: 90%;
@@ -452,5 +571,11 @@ export default {
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	bottom:80px;
+	height: 650px; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

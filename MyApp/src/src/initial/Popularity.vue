@@ -13,25 +13,10 @@
                 <img src="../assets/images/微信图片_20191212151058.png" alt="">
             </div>
             <div class="nav">
-                <div>
-                    <span>top4</span>
-                    <img src="../assets/images/4.jpg" alt="">
-                    <span><em></em>52115522</span>
-                </div>
-                <div>
-                    <span>top3</span>
-                    <img src="../assets/images/3.jpg" alt="">
-                    <span><em></em>52115522</span>
-                </div>
-                <div>
-                    <span>top2</span>
-                    <img src="../assets/images/2.jpg" alt="">
-                    <span><em></em>52115522</span>
-                </div>
-                <div>
-                    <span>top1</span>
-                    <img src="../assets/images/1.jpg" alt="">
-                    <span><em></em>52115522</span>
+                <div v-for="(item,index) in popularrank_arr" :key="index">
+                    <span>top{{index}}</span>
+                    <div class="img"><img :src="item.headimgurl" alt=""></div>
+                    <span><em></em>{{item.goods}}</span>
                 </div>
             </div>
             <div class="community">
@@ -47,23 +32,27 @@
                     人气榜
                 </div>
                 <div class="ranking_box">
-                    <div class="ranking_nav">
+                    <div class="ranking_nav" @click="rankinggo('邀请大神')">
                         <div class="ranking_text">
                             <span>邀请大神</span>
                             <span>></span>
                         </div>
                         <div class="ranking_first">
-                            <img src="../assets/images/1.jpg" alt="">
+                            <div class="img">
+                                <img :src="inviteimg" alt="">
+                            </div>
                             <span>top1</span>
                         </div>
                     </div>
-                    <div class="ranking_nav">
+                    <div class="ranking_nav" @click="rankinggo('上传大神')">
                         <div class="ranking_text">
                             <span>上传大神</span>
                             <span>></span>
                         </div>
                         <div class="ranking_first">
-                            <img src="../assets/images/5.jpg" alt="">
+                            <div class="img">
+                                <img :src="uploadimg" alt="">
+                            </div>
                             <span>top1</span>
                         </div>
                     </div>
@@ -74,27 +63,27 @@
                     69最热
                 </div>
                 <div class="heat_nav">
-                    <div>
+                    <div @click="hotListgo('官方推荐')">
                         <span class="heat_img heat_img1"></span>
                         <span>官方推荐</span>
                     </div>
-                    <div>
+                    <div @click="hotListgo('最新上传')">
                         <span class="heat_img heat_img2"></span>
                         <span>最新上传</span>
                     </div>
-                    <div>
+                    <div @click="hotListgo('金币专区')">
                         <span class="heat_img heat_img3"></span>
                         <span>金币专区</span>
                     </div>
-                    <div>
+                    <div @click="hotListgo('最多播放')">
                         <span class="heat_img heat_img4"></span>
                         <span>最多播放</span>
                     </div>
-                    <div>
+                    <div @click="hotListgo('最多评论')">
                         <span class="heat_img heat_img5"></span>
                         <span>最多评论</span>
                     </div>
-                    <div>
+                    <div @click="hotListgo('最多点赞')">
                         <span class="heat_img heat_img6"></span>
                         <span>最多点赞</span>
                     </div>
@@ -104,12 +93,13 @@
                 <div class="h4">
                     发现精彩
                 </div>
+                <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
                 <div class="wonderful_nav">
-                    <div class="wonderful_li" v-for="(item,index) in wonderful" :key="index" @click="singleGo(wonderful,index)">
+                    <div class="wonderful_li" v-for="(item,index) in wonderful" :key="index" @click="singleGo(item)">
                         <div class="wonderful_img">
-                            <img :src="item.posterimg" alt="">
+                            <img :src="item.thumbnail" alt="">
                             <div class="userimg">
-                                <img :src="item.userimg" alt="">
+                                <img :src="item.headimgurl" alt="">
                             </div>
                         </div>
                         <div class="wonderful_text">
@@ -117,6 +107,7 @@
                         </div>
                     </div>
                 </div>
+                </ScrollContent>
             </div>
         </div>
         <foot :check_index='check_index'></foot>
@@ -124,88 +115,84 @@
 </template>
 
 <script>
+import {popularrank,inviterank,uploadrand,homevideo} from '@/api/api'
 import  foot  from '@/components/Foot'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'Popularity',
   components: {
-    foot
+    foot,
+    ScrollContent
   },
   data() {
     return {
         check_index:1,
-        wonderful:[
-          {
-              "id":1,
-              "video":require("../assets/images/1.mp4"),
-              "posterimg":require("../assets/images/1_1.jpg"),
-              "userimg":require("../assets/images/1.jpg"),
-              "love":26,
-              "comment":28,
-              "share":30,
-              "username":"#晓亦呀",
-              "title":"#我 不觉得玻璃心有什么问题，只要玻璃心没有干涉到别人",
-              "musicname":"黄宛宛"
-          },
-          {
-              "id":2,
-              "video":require("../assets/images/2.mp4"),
-              "posterimg":require("../assets/images/2_2.jpg"),
-              "userimg":require("../assets/images/2.jpg"),
-              "love":999,
-              "comment":460,
-              "share":200,
-              "username":"#碰碰彭彭彭",
-              "title":"让一下，我要来炸场子了，炸街版《西游记》，了解一下",
-              "musicname":"碰碰彭彭彭"
-          },
-          {
-              "id":3,
-              "video":require("../assets/images/3.mp4"),
-              "posterimg":require("../assets/images/3_3.jpg"),
-              "userimg":require("../assets/images/3.jpg"),
-              "love":65564,
-              "comment":2015,
-              "share":30,
-              "username":"#带古拉K",
-              "title":"和@朱潇涵小姐姐给大家拜个早年，请签收我们的舞蹈节目",
-              "musicname":"带古拉K"
-          },
-          {
-              "id":4,
-              "video":require("../assets/images/4.mp4"),
-              "posterimg":require("../assets/images/4_4.jpg"),
-              "userimg":require("../assets/images/4.jpg"),
-              "love":26,
-              "comment":28,
-              "share":30,
-              "username":"#小洛海外跑腿",
-              "title":"网红舞，卡路里，看整段的，晚上发教学视频1",
-              "musicname":"小洛海外跑腿"
-          },
-          {
-              "id":5,
-              "video":require("../assets/images/5.mp4"),
-              "posterimg":require("../assets/images/5_5.jpg"),
-              "userimg":require("../assets/images/5.jpg"),
-              "love":26,
-              "comment":28,
-              "share":30,
-              "username":"#浙江美女榜",
-              "title":"#肤白貌美大长腿，多少月薪的男生才能追求",
-              "musicname":"浙江美女榜"
-          }
-        ]
+        wonderful:[],
+        popularrank_arr:[],
+        inviteimg:'',
+        uploadimg:'',
+        page:1,
+        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
     }
   },
   mounted () {
+      this.getdata()
+      this.getvideo()
   },
   methods: {
-    singleGo(arr,index) {
-        localStorage.setItem('Single',JSON.stringify(arr))
-        localStorage.setItem('Single_index',index)
+    getdata(){
+        popularrank().then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+                this.popularrank_arr = res.data.data.good
+                this.inviteimg = res.data.data.invite[0].headimgurl
+                this.uploadimg = res.data.data.upload[0].headimgurl
+            }
+        })
+    },
+    getvideo(){
+        homevideo(this.page).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0&&res.data.data.videos.length!=0){
+                this.wonderful.push(...res.data.data.videos)
+                this.page = this.page+1
+            }
+            if(res.data.data.videos.length == 0){
+                Toast('没有更多了...')
+            }
+            this.mescrolls.endErr()
+        })
+    },
+    singleGo(val) {
+        let num = sessionStorage.getItem('frequency')?Number(sessionStorage.getItem('frequency'))+1:1
+        sessionStorage.setItem('Single'+num,JSON.stringify(val))
+        sessionStorage.setItem('frequency',num)
         this.$router.push({
           path: '/Single_video'
         })
+    },
+    rankinggo(val){
+        this.$router.push({
+          path: '/ranking',
+          query:{
+              title:val
+          }
+        })
+    },
+    hotListgo(val){
+        this.$router.push({
+          path: '/hotList',
+          query:{
+              title:val
+          }
+        })
+    },
+    mescrollsInit (mescrolls) {
+        this.mescrolls = mescrolls;
+    },
+    loadDatas(){
+          this.getvideo()
     }
   }
 }
@@ -239,7 +226,9 @@ export default {
 }
 .center {
     padding: 95px 30px;
-    padding-bottom: 200px;
+    padding-bottom: 750px;
+    overflow-x: hidden;
+    position: relative;
 }
 .center .activity {
     width: 100%;
@@ -271,11 +260,17 @@ export default {
      background-size: 750px 4532px;
      background-position: -16px -3232px;
 }
-.center .nav div img {
+.center .nav div .img {
     width: 80px;
+    height: 80px;
     border-radius: 50%;
     margin-top: 10px;
     margin-bottom: 10px;
+    overflow: hidden;
+    background-color: #fff;
+}
+.center .nav div img {
+    width: 100%;
 }
 .center .nav div span {
     display: flex;
@@ -330,10 +325,16 @@ export default {
     font-size: 26px;
     align-items: center;
 }
-.center .ranking .ranking_box .ranking_first img {
+.center .ranking .ranking_box .ranking_first .img {
     width: 72px;
+    height: 72px;
     margin-right: 20px;
     border-radius: 50%;
+    overflow: hidden;
+    background-color: #999;
+}
+.center .ranking .ranking_box .ranking_first img {
+    width: 100%;
 }
 .center .heat {
     margin-bottom: 80px;
@@ -400,10 +401,13 @@ export default {
     width: 100%;
     height: 595px;
     position: relative;
+    background-color: #1d0f11;
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
 .center .wonderful .wonderful_nav .wonderful_li .wonderful_img img {
     width: 100%;
-    height: 100%;
     display: block;
 }
 .center .wonderful .wonderful_nav .wonderful_li .wonderful_img .userimg {
@@ -412,6 +416,8 @@ export default {
     position: absolute;
     bottom: 10px;
     left: 10px;
+    border-radius: 50%;
+    overflow: hidden;
 }
 .center .wonderful .wonderful_nav .wonderful_li .wonderful_text{
     width: 90%;
@@ -434,5 +440,12 @@ export default {
     padding-left: 14px;
     color: #fff;
     margin-bottom: 30px;
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	bottom:140px;
+    padding: 0px 20px;
+	height: 650px; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

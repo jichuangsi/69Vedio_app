@@ -1,15 +1,15 @@
 <template>
     <div class="notice">
         <div class="nav">
-            <div>
+            <div @click="follow_go(1)">
                 <span class="fs"></span>
                 <span>粉丝</span>
             </div>
-            <div>
+            <div @click="messageList('赞')">
                 <span class="dz"></span>
                 <span>点赞</span>
             </div>
-            <div>
+            <div @click="messageList('评论')">
                 <span class="pl"></span>
                 <span>评论</span>
             </div>
@@ -21,10 +21,10 @@
                 <span>69视频助手</span>
                 <div class="btn">下载</div>
             </div>
-            <div class="li">
-                <img src="../assets/images/火 (1).png" alt="">
-                <span>Tina</span>
-                <div>19：00</div>
+            <div class="li" @click="notifygo()">
+                <img src="../assets/images/微信图片_20191210111856.png" alt="">
+                <span>系统通知</span>
+                <div></div>
             </div>
             <div class="li">
                 <img src="../assets/images/微信图片_20191210111856.png" alt="">
@@ -34,34 +34,98 @@
         </div>
         <div class="follow_ul">
             <div class="h4">推荐关注</div>
-            <div class="follow_li" @click="personalgo(1)">
-                <div class="userimg">
-                    <img src="../assets/images/星星.png" alt="">
+            
+            <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+                <div class="follow_li" v-for="(item,index) in notice_arr" :key="index" @click="personalgo(item.id)">
+                    <div class="userimg">
+                        <img :src="item.headimgurl" alt="">
+                    </div>
+                    <div class="user">
+                        <div class="username">{{item.username}}</div>
+                        <div class="usersex"><span><em :class="{nv:item.sex == 2,nan:item.sex == 1}"></em>{{item.sex == 1?'男':'女'}}</span></div>
+                        <div class="usertext">可能认识的人</div>
+                    </div>
+                    <div class="follow_btn NO" v-if="item.concerned == null" @click.stop="add_concern(item.id,index)">关注</div>
+                    <div class="follow_btn" v-if="item.concerned != null" @click.stop="del_concern(item.id,index)">已关注</div>
                 </div>
-                <div class="user">
-                    <div class="username">Tina</div>
-                    <div class="usersex"><span><em class="nv"></em>女</span></div>
-                    <div class="usertext">可能认识的人</div>
-                </div>
-                <div class="follow_btn">关注</div>
-                <div class="follow_del">x</div>
-            </div>
+            </ScrollContent>
         </div>
     </div>
 </template>
 
 <script>
+import {recommendconcerns,addconcern,delconcern} from '@/api/api'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'notice',
+  components: {
+    ScrollContent,
+    },
   data() {
     return {
+        page:1,
+        notice_arr:[],
+        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
     }
   },
   mounted () {
+      this.getdata()
   },
   methods: {
+    getdata(){
+        recommendconcerns(this.page).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0&&res.data.data.members.length != 0){
+                this.notice_arr.push(...res.data.data.members)
+                this.page = this.page + 1
+            }
+            if(res.data.data.members.length == 0){
+                Toast('没有更多了...')
+            }
+            this.mescrolls.endErr()
+        })
+    },
+    follow_go(index){
+        this.$router.push({
+          path: '/follow',
+          query: {
+            index: index
+          }
+        })
+    },
     personalgo(id){
         this.$router.push({ path:'/personal',query:{id:id} })
+    },
+    notifygo(){
+        this.$router.push({ path:'/notify' })
+    },
+    messageList(val){
+        this.$router.push({ path:'/messageList',query:{title:val} })
+    },
+    add_concern(id,index){
+        addconcern(id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+            this.notice_arr[index].concerned = 0
+                Toast(res.data.message)
+            }
+        })
+    },
+    del_concern(id,index){
+        delconcern(id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+                this.notice_arr[index].concerned = null
+                Toast(res.data.message)
+            }
+        })
+    },
+    mescrollsInit (mescrolls) {
+        this.mescrolls = mescrolls;
+    },
+    loadDatas(){
+          this.getdata()
     }
   }
 }
@@ -70,7 +134,7 @@ export default {
 <style scoped lang="scss">
 .notice {
     padding: 0px 30px;
-    padding-bottom: 200px;
+    padding-bottom: 500px;
 }
 .nav {
     width: 100%;
@@ -197,14 +261,23 @@ export default {
     width: 130px;
     height: 60px;
     border-radius: 60px;
-    background-color: #ff3841;
+    background-color: #311d20;
     font-size: 30px;
     font-weight: 600;
     text-align: center;
     line-height: 60px;
     margin-right: 40px;
 }
+.follow_ul .follow_li .NO {
+    background-color: #ff3841;
+}
 .follow_ul .follow_li .follow_del {
     width: 24px;
+}
+.mescroll {
+    position: absolute;
+    left: 20px;
+	bottom:95px;
+	height: 400px; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

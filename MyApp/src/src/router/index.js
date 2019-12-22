@@ -11,13 +11,22 @@ import wallet from '@/initial/wallet'
 import cash from '@/initial/cash'
 import Profit from '@/initial/Profit'
 import Rechargerecord from '@/initial/Rechargerecord'
+import edit from '@/initial/edit'
 import follow from '@/initial/follow'
 import notice from '@/components/notice'
 import nearby from '@/components/nearby'
 import friend from '@/components/friend'
 import Video_play from '@/components/Video_play'
+import follow_video from '@/components/follow_video'
 import Single_video from '@/components/Single_video'
 import Extension from '@/components/Extension'
+import ScrollContent from '@/components/ScrollContent'
+import loading from '@/components/loading'
+import hotList from '@/components/hotList'
+import searchUser from '@/components/searchUser'
+import ranking from '@/components/ranking'
+import notify from '@/components/notify'
+import messageList from '@/components/messageList'
 import Foot from '@/components/Foot'
 
 Vue.use(Router)
@@ -105,6 +114,11 @@ export default new Router({
       component: Video_play
     },
     {
+      path: '/follow_video',
+      name: 'follow_video',
+      component: follow_video
+    },
+    {
       path: '/Single_video',
       name: 'Single_video',
       component: Single_video
@@ -113,6 +127,46 @@ export default new Router({
       path: '/Extension',
       name: 'Extension',
       component: Extension
+    },
+    {
+      path: '/edit',
+      name: 'edit',
+      component: edit
+    },
+    {
+      path: '/ScrollContent',
+      name: 'ScrollContent',
+      component: ScrollContent
+    },
+    {
+      path: '/loading',
+      name: 'loading',
+      component: loading
+    },
+    {
+      path: '/hotList',
+      name: 'hotList',
+      component: hotList
+    },
+    {
+      path: '/searchUser',
+      name: 'searchUser',
+      component: searchUser
+    },
+    {
+      path: '/ranking',
+      name: 'ranking',
+      component: ranking
+    },
+    {
+      path: '/notify',
+      name: 'notify',
+      component: notify
+    },
+    {
+      path: '/messageList',
+      name: 'messageList',
+      component: messageList
     },
     {
       path: '/Foot',

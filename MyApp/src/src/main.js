@@ -4,7 +4,6 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import 'lib-flexible/flexible'
-import './assets/style/reset.css'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import VueCorvova from 'vue-cordova'
 Vue.use(VueAwesomeSwiper)
@@ -13,11 +12,15 @@ import store from './store/index'
 
 import MintUI from 'mint-ui'
 import 'mint-ui/lib/style.css'
+import './assets/style/reset.css'
 Vue.use(MintUI)
 
-import Vconsole from 'vconsole'
-const vConsole = new Vconsole()
-Vue.use(vConsole) 
+// import Vconsole from 'vconsole'
+// const vConsole = new Vconsole()
+// Vue.use(vConsole) 
+
+import VueClipboard from 'vue-clipboard2'
+Vue.use(VueClipboard)
 
 Vue.use(VueCorvova);
 

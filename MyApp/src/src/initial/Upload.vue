@@ -25,7 +25,7 @@
                     <video loop v-if="filevideo">
                         <source :src="filevideo" type="video/mp4">
                     </video>
-                    <input type="file" name="" id="video" @change="videochange">
+                    <!-- <input type="file" name="" id="video" @change="videochange"> -->
                 </div>
                 <div>
                     <sup>※</sup>视频大小不能超过50M
@@ -37,7 +37,7 @@
                     <div class="add">+</div>
                     <div>上传图片</div>
                     <img :src="fileimg" v-if="fileimg" alt="">
-                    <input type="file" name="" id="img">
+                    <!-- <input type="file" name="" id="img"> -->
                 </div>
                 <div>
                     <sup>※</sup>点击选择封面（必选）
@@ -59,8 +59,16 @@
                 <span>（最多添加5个标签）</span>
             </div>
             <div class="ipt">
-                <input type="text" v-for="(item,index) in ipt_arr" :key="index">
+                <div class="input" v-for="(item,index) in ipt_arr" :key="index" @click='delipt(index)'>{{item}}</div>
                 <div @click="addipt()">+</div>
+            </div>
+        </div>
+        <div class="video_label">
+            <div class="h4">
+                添加分类
+            </div>
+            <div class="ipt">
+                <div class="input oneinput" @click='delclass()'>{{class_name}}</div>
             </div>
         </div>
         <div class="Agreement" @click="Agreement_state = !Agreement_state">
@@ -71,20 +79,30 @@
         </div>
     </div>
     <div class="bj" v-if="bottom_check">
-    <div class="bottom_box" :class="{bottom_check:bottom_check}">
-        <div class="ps" @click="ps(ps_text)">
-            <div>拍摄</div>
-            <div class="text">{{ps_text}}</div>
+        <div class="bottom_box" :class="{bottom_check:bottom_check}">
+            <div class="ps" @click="ps(ps_text)">
+                <div>拍摄</div>
+                <div class="text">{{ps_text}}</div>
+            </div>
+            <div class="xz" @click="xz(ps_text)">
+                <div>从手机相册选择</div>
+            </div>
+            <div class="xz" v-if="ylstate" @click="ylclick">
+                <div>预览</div>
+            </div>
+            <div class="xian"></div>
+            <div class="qx" @click="bottom_check = !bottom_check">取消</div>
         </div>
-        <div class="xz" @click="xz(ps_text)">
-            <div>从手机相册选择</div>
-        </div>
-        <div class="xz" v-if="ylstate" @click="ylclick">
-            <div>预览</div>
-        </div>
-        <div class="xian"></div>
-        <div class="qx" @click="bottom_check = !bottom_check">取消</div>
     </div>
+    <div class="bj" v-if="tagsstate" @click="tagsstate = !tagsstate">
+        <div class="white">
+            <div v-for="(item,index) in tags_arr" :key="index" @click.stop="tags_check(item)">{{item.name}}</div>
+        </div>
+    </div>
+    <div class="bj" v-if="classesstate" @click="classesstate = !classesstate">
+        <div class="white">
+            <div v-for="(item,index) in classes_arr" :key="index" @click.stop="classes_check(item)">{{item.name}}</div>
+        </div>
     </div>
     <div class="bigbox" v-show="bigstate" @click="bigclick">
         <img :src="fileimg" alt="" v-if="ps_text == '拍摄图片'">
@@ -92,20 +110,25 @@
             <source :src="filevideo" type="video/mp4">
         </video>
     </div>
+    <load v-if="!uploadbtn"></load>
     </div>
 </template>
 
 <script>
 import axios from 'axios'
-import {upload} from '@/api/api'
+import {upload,gettags,getclasses} from '@/api/api'
 import { Toast } from 'mint-ui';
+import load from '@/components/loading'
 export default {
   name: 'Upload',
+  components: {
+      load
+  },
   data() {
     return {
-      ipt_arr: [1],
+      ipt_arr: [],
       bottom_check:false,
-      Agreement_state:false,
+      Agreement_state:true,
       ps_text: "拍摄视频",
       ready:false,
     //   fileimg: require('../assets/images/cd29fe54b110d82bbe16d8400e0383b6.jpg'),
@@ -115,12 +138,20 @@ export default {
       ylstate: false,
       title:'',
       money:0,
-      param:''
+      param:'',
+      class_name:'',
+      tagsstate:false,
+      tags_arr:[],
+      classesstate:false,
+      classes_arr:[],
+      tags_id:[],
+      classes_id:'',
+      uploadbtn:true
     }
   },
   computed:{
       btnstate(){
-          if(this.title!=''&&this.fileimg!=''&&this.filevideo!=''&&this.Agreement_state){
+          if(this.title.length>=8&&this.fileimg!=''&&this.filevideo!=''&&this.Agreement_state){
               return true
           }else{
               return false
@@ -129,101 +160,55 @@ export default {
   },
   mounted () {
     this.initialize();
+    this.getdata()
     this.param = new FormData()
   },
   methods: {
-      videochange(){
-
-            var param = new FormData()
-            var reads = new FileReader();
-          let file = document.getElementById('video').files[0]
-            reads.readAsDataURL(file);
-            reads.onloadend = function(e) {
-                let dd = new Blob([this.result],{type:'video/mp4'})
-                console.log(dd)
-                param.append('ss',dd,'sd.mp4')
-                console.log(param.get('ss'))
-            };
-      },
-
-
-
-      uploadBtn(){
-
-        //   console.log(document.getElementById('video').files)
-        //   console.log(document.getElementById('video').files[0])
-          let self = this
-
-          self.param.append('title',self.title)
-          self.param.append('accept',self.Agreement_state?1:0)
-          self.param.append('gold',self.money)
-        //   self.param.append('fileimg',document.getElementById('img').files[0])
-        //   self.param.append('filevideo',document.getElementById('video').files[0])
-            // self.param.title = self.title
-            // self.param.accept = self.Agreement_state
-            // self.param.gold = self.money
-            // self.param.fileimg = document.getElementById('img').files[0]
-            // self.param.filevideo = document.getElementById('video').files[0]
-
-          /*console.log(self.param)
-          console.log(self.param.get('fileimg'))*/
-
-            /*console.log(self.param.get('title'))
-            console.log(self.param.get('filevideo'))
-            console.log(self.param.get('filevideo').lastModified)
-            console.log(self.param.get('filevideo').name)
-            console.log(self.param.get('filevideo').size)
-            console.log(self.param.get('filevideo').type)*/
-          upload(self.param).then(res=>{
+      getdata(){
+          gettags().then(res=>{
               console.log(res)
-          }).catch(err=>{
-              console.log(err)
+            //   if(res.data.resultCode == 0){
+                this.tags_arr = res.data.data
+            //   }
           })
-            // console.log(self.param.get('filevideo'))
-            // console.log(self.param.get('fileimg'))
-            // const instance=axios.create({
-            // withCredentials: true
-            // })
-
-        // axios.post('http://192.168.31.108:71/Videoservice/upload',
-        // self.param,
-        // {
-        //     headers: {
-        //         'Content-Type': 'application/x-www-form-urlencoded'
-        //     }
-        // }
-        // ).then(res=>{
-        //     console.log(res)
-        //         if(res.code == 200){
-        //             alert('提交成功');
-        //         }else{
-        //             alert("请输入完整再提交");
-        //         }
-
-        //     })
-
-
-
-          if(this.btnstate){
-            //   let data = localStorage.getItem('my_video')?JSON.parse(localStorage.getItem('my_video')):[]
-            //   data.push({
-            //     "video":this.filevideo,
-            //     "posterimg":this.fileimg,
-            //     "userimg":require('../assets/images/星星.png'),
-            //     "love":0,
-            //     "comment":0,
-            //     "share":0,
-            //     "username":"#爱笑的女孩",
-            //     "title":this.title,
-            //     "musicname":"爱笑的女孩"
-            //   })
-            //   localStorage.setItem('my_video',JSON.stringify(data))
-            //   this.filevideo = ''
-            //   this.fileimg = ''
-            //   this.title = ''
-            //   this.money = ''
-            //   this.ipt_arr = [1]
-            //   Toast('上传成功')
+          getclasses().then(res=>{
+              console.log(res)
+            //   if(res.data.resultCode == 0){
+                this.classes_arr = res.data.data
+            //   }
+          })
+      },
+      uploadBtn(){
+          let self = this
+          if(self.btnstate&&self.uploadbtn){
+              self.uploadbtn = false
+              let a = self.tags_id.toString()
+              self.param.append('title',self.title)
+              self.param.append('accept',self.Agreement_state?1:0)
+              self.param.append('gold',self.money)
+              self.param.append('tags',a)
+              self.param.append('class',self.classes_id)
+              console.log(self.param.get('tags'))
+              console.log(self.param.get('class'))
+            upload(self.param).then(res=>{
+                console.log(res)
+                Toast(res.data.message)
+                self.uploadbtn = true
+                if(res.data.resultCode == 0){
+                    self.title = ''
+                    self.Agreement_state = true
+                    self.money = 0
+                    self.fileimg = ''
+                    self.filevideo = ''
+                    self.classes_id = ''
+                    self.class_name = ''
+                    self.tags_id = []
+                    self.ipt_arr = []
+                }
+            }).catch(err=>{
+                console.log(err)
+                self.uploadbtn = true
+            })
           }
       },
     initialize() {
@@ -242,7 +227,7 @@ export default {
     },
     addipt(){
       if(this.ipt_arr.length<5){
-        this.ipt_arr.push(this.ipt_arr.length)
+        this.tagsstate = true
       }
     },
     myupload(){
@@ -280,88 +265,17 @@ export default {
             }
         );
         function onSuccess(res){
-            console.log(res)
-            console.log(res[0].localURL)
             self.filevideo = res[0].fullPath
             self.$refs.sp_video.src = res[0].fullPath
             self.bottom_check = false
-
-            var file = res[0];
-            var videoFileName = file.name.split('.')[0];
-            let ratio = (file.size/1048576)/15;
-            let expressed = ratio*1048576;
-            console.log(file)
-            VideoEditor.transcodeVideo(
-                    videoTranscodeSuccess,
-                    videoTranscodeError,
-                    {
-                        fileUri: file.fullPath,
-                        outputFileName: videoFileName,
-                        outputFileType: VideoEditorOptions.OutputFileType.MPEG4,
-                        optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES,
-                        saveToLibrary: true,
-                        maintainAspectRatio: true,
-                        // width: 640,
-                        // height: 640,
-                        videoBitrate: expressed, // 1 megabit
-                        audioChannels: 2,
-                        audioSampleRate: 44100,
-                        audioBitrate: 128000, // 128 kilobits
-                        progress: function(info) {
-                            console.log('transcodeVideo progress callback, info: ' + info);
-                        }
-                    }
-                );
-            }
-
-            function videoTranscodeSuccess(result) {
-                // result is the path to the transcoded video on the device
-                console.log('videoTranscodeSuccess, result: ' + result);
+            self.edit(res[0])
+        }
 
 
-                    self.filevideo = result
-                    self.$refs.sp_video.src = result
-                    let url = 'file://'+result
-                window.resolveLocalFileSystemURL(url, (fileEntry) => {
-                    console.log(fileEntry)
-                    let sss = new FormData()
-                    sss.append('dss','444')
-                    sss.append('asd',fileEntry[0])
-                    console.log(sss)
-                    console.log(sss.getAll())
-                })
-            }
-
-            function videoTranscodeError(err) {
-                console.log('videoTranscodeError, err: ' + err);
-            }
-
-
-
-
-            // window.resolveLocalFileSystemURL(res[0].fullPath, (fileEntry) => {
-            //     fileEntry.file(function (file) {
-            //     let reader = new FileReader();
-            //     reader.onloadend = function () {
-            //     //reader.readAsText(file);
-            //     reader.readAsBinaryString(file);
-            //     console.log(1111)
-            //     console.log(file)
-            //     // reader.readAsDataURL(file);
-            //     }, () => {
-            //         alert(111)
-            //     }
-            //     });
-            //     }, self.errorCallback)
-            // }
         function onFail(err){
             console.log(err)
             self.bottom_check = false
         }
-    },
-    errorCallback(err){
-        console.log(1122)
-        console.log(err)
     },
     zp(){
         let self = this
@@ -378,6 +292,20 @@ export default {
         console.log(imageData)
         self.fileimg = imageData
         self.bottom_check = false
+        window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
+        fileEntry.file(function (file) {
+            console.log(file)
+            console.log(file.size)
+            if(file.size<1048576){
+                self.zhuan(file.localURL)
+            }else{
+                Toast('图片过大')
+            }
+        });
+        }, (err)=>{
+            console.log(6666)
+            console.log(err)
+        })
         }
         function onFail(message) {
         console.log(message)
@@ -405,36 +333,14 @@ export default {
           cameraDirection: 0
         });
         function onSuccess(mp4Data) {
-        console.log(mp4Data)
-        console.log('file://'+ mp4Data)
         self.filevideo = 'file://'+ mp4Data
         self.$refs.sp_video.src = 'file://'+ mp4Data
         self.bottom_check = false
-
-
         window.resolveLocalFileSystemURL(self.filevideo, (fileEntry) => {
-
         fileEntry.file(function (file) {
-        var reader = new FileReader()
-          reader.readAsArrayBuffer(file);
-          reader.onload = function() {
-         let imgBlob = new Blob([this.result], {
-            type: "video/mp4"
-        })
-        console.log(imgBlob)
-
-        // let file = new File([imgBlob], "yigeshipin", {type: "video/mp4"})
-        // console.log(2)
-        // console.log(file)
-        self.param.append('filevideo', imgBlob, 'vid.mp4')
-        //reader.readAsText(file);
-        // reader.readAsBinaryString(file);
-        // reader.readAsDataURL(file);
-        }/*, () => {
-            console.log(555)
-        }*/
-          //reader.readAsDataURL(file)
+            self.edit(file)
         });
+
         }, (err)=>{
             console.log(6666)
             console.log(err)
@@ -460,29 +366,17 @@ export default {
           encodingType: Camera.EncodingType.PNG
         });
         function onSuccess(imageData) {
-        console.log(imageData)
         self.fileimg = imageData
         self.bottom_check = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
-        console.log(fileEntry)
         fileEntry.file(function (file) {
-          console.log(file);
-        let reader = new FileReader();
-         reader.readAsArrayBuffer(file);
-        reader.onload = function () {
-        //reader.readAsText(file);
-        /*console.log(this.error);
-        console.log(this.result);
-        console.log(new Blob([this.result]))*/
-        let imgBlob = new Blob([this.result], { type: "image/png"})
-        // console.log(imgBlob)
-        self.param.append('fileimg',imgBlob, 'img.png')
-        // console.log(self.param.get('fileimg'))
-        // reader.readAsBinaryString(file);
-        };/*, () => {
-            console.log(555)
-        }*/
-        //reader.readAsDataURL(file);
+            console.log(file)
+            console.log(file.size)
+            if(file.size<1048576){
+                self.zhuan(file.localURL)
+            }else{
+                Toast('图片过大')
+            }
         });
         }, (err)=>{
             console.log(6666)
@@ -500,6 +394,76 @@ export default {
         }else{
         }
     },
+    edit(val){
+        console.log(val)
+        let self = this
+        if(val.size < 10485760){
+            self.zhuan(val.localURL)
+        }else{
+            let file = val;
+            let videoFileName = val.name.split('.')[0];
+            let videoName = val.name
+            let ratio = (file.size/1048576)/15;
+            let expressed = ratio*1048576;
+            VideoEditor.transcodeVideo(
+                    videoTranscodeSuccess,
+                    videoTranscodeError,
+                    {
+                        fileUri: file.localURL,
+                        outputFileName: videoFileName,
+                        outputFileType: VideoEditorOptions.OutputFileType.MPEG4,
+                        optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES,
+                        saveToLibrary: true,
+                        maintainAspectRatio: true,
+                        // width: 640,
+                        // height: 640,
+                        videoBitrate: expressed, // 1 megabit
+                        audioChannels: 2,
+                        audioSampleRate: 44100,
+                        audioBitrate: 128000, // 128 kilobits
+                        progress: function(info) {
+                            console.log('transcodeVideo progress callback, info: ' + info);
+                        }
+                    }
+                );
+        }
+            
+            function videoTranscodeSuccess(result) {
+                    self.filevideo = result
+                    self.$refs.sp_video.src = result
+                    let url = 'file://'+result
+                    self.zhuan(url)
+            }
+            function videoTranscodeError(err) {
+                console.log('videoTranscodeError, err: ' + err);
+            }
+    },
+    zhuan(url){
+        let self = this
+        window.resolveLocalFileSystemURL(url, (fileEntry) => {
+            fileEntry.file(function (file) {
+                console.log(file)
+            var reader = new FileReader()
+            reader.readAsArrayBuffer(file);
+            reader.onload = function() {
+            let imgBlob = new Blob([this.result], {
+                type: file.type
+            })
+            if(file.type.indexOf('image')!=-1){
+                console.log(111)
+                if(file.type.indexOf('png')!=-1){
+                    self.param.append('fileimg', imgBlob, file.name+'.png')
+                }else{
+                    self.param.append('fileimg', imgBlob, file.name)
+                }
+                    }else{
+                console.log(222)
+                    self.param.append('filevideo', imgBlob, file.name)
+                    }
+                    }
+                    })
+                })
+            },
     ylclick(){
         this.bigstate = true
         this.bottom_check = false
@@ -513,6 +477,26 @@ export default {
         if(this.ps_text == '拍摄视频'&&this.bigstate == false){
             this.$refs.sp_video.pause()
         }
+    },
+    delipt(index){
+        this.ipt_arr.splice(1,index)
+        this.tags_id.splice(1,index)
+    },
+    tags_check(val){
+        console.log(val)
+        this.ipt_arr.push(val.name)
+        this.tags_id.push(val.tid)
+        this.tagsstate = false
+        console.log(this.ipt_arr)
+        console.log(this.tags_id)
+    },
+    delclass(){
+        this.classesstate = true
+    },
+    classes_check(val){
+        this.class_name = val.name
+        this.classes_id = val.cid
+        this.classesstate = false
     }
   }
 }
@@ -640,13 +624,20 @@ export default {
     flex-wrap: wrap;
     align-items: center;
 }
-.center .video_label .ipt input{
+.center .video_label .ipt .input{
     width: 120px;
     height: 72px;
     background-color: #241618 !important;
     color: #fff;
     padding: 0px 10px;
     margin-bottom: 20px;
+    margin-right: 20px;
+    font-size: 32px;
+    line-height: 72px;
+    text-align: center;
+}
+.center .video_label .ipt .oneinput {
+    width: 240px;
 }
 .center .video_label .ipt div {
     font-size: 66px;
@@ -779,5 +770,28 @@ export default {
 }
 .bigbox video {
     width: 100%;
+}
+.white {
+    width: 90%;
+    height: 60%;
+    overflow-y: auto;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 10px;
+    background-color: #fff;
+    padding: 20px;
+}
+.white div {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 1px solid #999;
+    color: #999;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    font-size: 26px;
+    line-height: 36px;
+    display: inline-block;
 }
 </style>
