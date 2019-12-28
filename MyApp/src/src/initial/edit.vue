@@ -96,12 +96,12 @@
     <div class="bj" v-if="message">
         <div class="message_box">
             <div class="title">{{message_text}}</div>
-            <input type="text" v-model="nickname" maxlength="10" v-if="message_index == 0">
-            <input type="number" v-model="username" maxlength="10" v-if="message_index == 1">
+            <input type="text" v-model="nickname" maxlength="8" v-if="message_index == 0">
+            <input type="text" v-model="username" maxlength="10" v-if="message_index == 1" onkeyup="this.value=this.value.replace(/[^\w]/g,'');">
             <textarea v-model="introduce" maxlength="100" v-if="message_index == 2"></textarea>
             <div class="btn">
                 <div class="left" @click.stop="message=!message">取消</div>
-                <div class="right" @click.stop="del">确定</div>
+                <div class="right" @click.stop="message=!message">确定</div>
             </div>
         </div>
     </div>
@@ -203,7 +203,7 @@ export default {
             this.editbtn = true
             Toast(res.data.message)
             if(res.data.resultCode == 0){
-                getmemberinfo(165).then(res =>{
+                getmemberinfo().then(res =>{
                     if(res.data.resultCode == 0){
                         Toast(res.data.message)
                         sessionStorage.setItem('user',JSON.stringify(res.data.data))
@@ -516,7 +516,7 @@ export default {
 }
 .message_box .title {
     font-size: 32px;
-    line-height: 46px;
+    line-height: 86px;
     padding-top: 10px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -528,23 +528,28 @@ export default {
 }
 .message_box .btn {
     font-size: 28px;
-    line-height: 56px;
+    line-height: 76px;
+    letter-spacing: 5px;
     display: flex;
+    margin-top: 40px;
+    border-bottom: none;
 }
 .message_box .btn div {
     flex: 1;
     border-top: 1px solid #666;
+    border-bottom: none;
 }
 .message_box .btn div:first-child {
     border-right: 1px solid #666;
 }
 .message_box input{
-    background-color: rgba(255, 255, 255, 0.6) !important;
+    background-color: #f2f2f2 !important;
     font-size: 28px;
     line-height: 46px;
     width: 80%;
     text-align: center;
     margin: 20px auto;
+    border-radius: 20px;
 }
 .message_box textarea {
     background-color: rgba(255, 255, 255, 0.6) !important;
@@ -552,5 +557,7 @@ export default {
     line-height: 36px;
     width: 80%;
     margin: 20px auto;
+    border-radius: 5px;
+    height: 106px;
 }
 </style>

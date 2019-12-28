@@ -2,7 +2,7 @@
   "name": "src",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "lzq <ing_lzq@163.com>",
+  "author": "lzq <2368566974@qq.com>",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -13,6 +13,7 @@
     "axios": "^0.19.0",
     "fingerprintjs": "^0.5.3",
     "lib-flexible": "^0.3.2",
+    "lrz": "^4.9.40",
     "mescroll.js": "^1.4.1",
     "mint-ui": "^2.2.9",
     "qrcode": "^1.4.4",

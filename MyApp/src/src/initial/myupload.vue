@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     getdata(){
-        myvideos(this.page,161).then(res=>{
+        myvideos(this.page).then(res=>{
             console.log(res)
             if(res.data.resultCode == 0&&res.data.data.videos.length !=0){
                 this.purchase_arr.push(...res.data.data.videos)
@@ -123,6 +123,7 @@ export default {
 }
 .center {
     // padding: 60px 30px;
+    position: relative;
 }
 .center .wonderful_nav {
     width: 100%;
@@ -159,6 +160,7 @@ export default {
     left: 10px;
     border-radius: 50%;
     overflow: hidden;
+    background-color: #fff;
 }
 .center .wonderful_nav .wonderful_li .wonderful_text{
     width: 90%;
@@ -177,8 +179,8 @@ export default {
 .mescroll {
     position: absolute;
     left: 0px;
-	bottom:0px;
+	top:0px;
     padding: 20px;
-	height: auto; /*如设置bottom:50px,则需height:auto才能生效*/
+	height: 90vh; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 </style>

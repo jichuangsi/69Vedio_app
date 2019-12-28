@@ -27,6 +27,7 @@ import searchUser from '@/components/searchUser'
 import ranking from '@/components/ranking'
 import notify from '@/components/notify'
 import messageList from '@/components/messageList'
+import searchList from '@/components/searchList'
 import Foot from '@/components/Foot'
 
 Vue.use(Router)
@@ -167,6 +168,11 @@ export default new Router({
       path: '/messageList',
       name: 'messageList',
       component: messageList
+    },
+    {
+      path: '/searchList',
+      name: 'searchList',
+      component: searchList
     },
     {
       path: '/Foot',

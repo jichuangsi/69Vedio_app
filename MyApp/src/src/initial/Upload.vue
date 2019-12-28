@@ -9,7 +9,7 @@
         <div class="video_title">
             <div class="h4">
                 标题
-                <span>（标题内容长度8-20个字）</span>
+                <span>（标题内容长度5-20个字）</span>
             </div>
             <input type="text" maxlength="20" v-model="title">
         </div>
@@ -28,7 +28,7 @@
                     <!-- <input type="file" name="" id="video" @change="videochange"> -->
                 </div>
                 <div>
-                    <sup>※</sup>视频大小不能超过50M
+                    <sup>※</sup>视频大小不能超过30M
                 </div>
             </div>
             <div class="png">
@@ -106,7 +106,7 @@
     </div>
     <div class="bigbox" v-show="bigstate" @click="bigclick">
         <img :src="fileimg" alt="" v-if="ps_text == '拍摄图片'">
-        <video loop v-if="ps_text == '拍摄视频'" ref="sp_video">
+        <video loop v-if="ps_text != '拍摄图片'" ref="sp_video">
             <source :src="filevideo" type="video/mp4">
         </video>
     </div>
@@ -151,7 +151,7 @@ export default {
   },
   computed:{
       btnstate(){
-          if(this.title.length>=8&&this.fileimg!=''&&this.filevideo!=''&&this.Agreement_state){
+          if(this.title.length>=5&&this.fileimg!=''&&this.filevideo!=''&&this.Agreement_state){
               return true
           }else{
               return false
@@ -265,9 +265,10 @@ export default {
             }
         );
         function onSuccess(res){
-            self.filevideo = res[0].fullPath
-            self.$refs.sp_video.src = res[0].fullPath
+            // self.filevideo = res[0].fullPath
+            // self.$refs.sp_video.src = res[0].fullPath
             self.bottom_check = false
+            self.uploadbtn = false
             self.edit(res[0])
         }
 
@@ -281,7 +282,7 @@ export default {
         let self = this
         if(self.ready){
         navigator.camera.getPicture(onSuccess, onFail, {
-          quality: 50,
+          quality: 100,
           destinationType: Camera.DestinationType.NATIVE_URI,
           mediaType: 0,
           saveToPhotoAlbum: true,
@@ -290,17 +291,14 @@ export default {
         });
         function onSuccess(imageData) {
         console.log(imageData)
-        self.fileimg = imageData
+        // self.fileimg = imageData
         self.bottom_check = false
+        self.uploadbtn = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
         fileEntry.file(function (file) {
             console.log(file)
             console.log(file.size)
-            if(file.size<1048576){
-                self.zhuan(file.localURL)
-            }else{
-                Toast('图片过大')
-            }
+            self.zp_edit(file,imageData)
         });
         }, (err)=>{
             console.log(6666)
@@ -333,12 +331,13 @@ export default {
           cameraDirection: 0
         });
         function onSuccess(mp4Data) {
-        self.filevideo = 'file://'+ mp4Data
-        self.$refs.sp_video.src = 'file://'+ mp4Data
+        // self.filevideo = 'file://'+ mp4Data
+        // self.$refs.sp_video.src = 'file://'+ mp4Data
         self.bottom_check = false
-        window.resolveLocalFileSystemURL(self.filevideo, (fileEntry) => {
+        self.uploadbtn = false
+        window.resolveLocalFileSystemURL('file://'+ mp4Data, (fileEntry) => {
         fileEntry.file(function (file) {
-            self.edit(file)
+            self.edit(file,'file://'+ mp4Data)
         });
 
         }, (err)=>{
@@ -366,25 +365,19 @@ export default {
           encodingType: Camera.EncodingType.PNG
         });
         function onSuccess(imageData) {
-        self.fileimg = imageData
+        // self.fileimg = imageData
         self.bottom_check = false
+        self.uploadbtn = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
         fileEntry.file(function (file) {
             console.log(file)
             console.log(file.size)
-            if(file.size<1048576){
-                self.zhuan(file.localURL)
-            }else{
-                Toast('图片过大')
-            }
+            self.zp_edit(file,imageData)
         });
         }, (err)=>{
             console.log(6666)
             console.log(err)
         })
-
-
-
         }
         function onFail(message) {
         console.log(message)
@@ -394,11 +387,15 @@ export default {
         }else{
         }
     },
-    edit(val){
+    edit(val,path){
         console.log(val)
         let self = this
+        let urlpath = path?path:val.fullPath
         if(val.size < 10485760){
-            self.zhuan(val.localURL)
+            self.zhuan(urlpath)
+            self.filevideo = urlpath
+            self.$refs.sp_video.src = urlpath
+            self.uploadbtn = true
         }else{
             let file = val;
             let videoFileName = val.name.split('.')[0];
@@ -409,7 +406,7 @@ export default {
                     videoTranscodeSuccess,
                     videoTranscodeError,
                     {
-                        fileUri: file.localURL,
+                        fileUri: urlpath,
                         outputFileName: videoFileName,
                         outputFileType: VideoEditorOptions.OutputFileType.MPEG4,
                         optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES,
@@ -431,18 +428,41 @@ export default {
             function videoTranscodeSuccess(result) {
                     self.filevideo = result
                     self.$refs.sp_video.src = result
+                    self.uploadbtn = true
                     let url = 'file://'+result
                     self.zhuan(url)
             }
             function videoTranscodeError(err) {
+                Toast('上传视频出错')
+                    self.uploadbtn = true
                 console.log('videoTranscodeError, err: ' + err);
             }
+    },
+    zp_edit(val,path){
+        console.log(val)
+        console.log(555)
+        let self = this
+        let urlpath = path?path:val.localURL
+        if(val.size<5048576){
+        console.log(999)
+            self.zhuan(urlpath)
+            self.fileimg = urlpath
+            self.uploadbtn = true
+        }else{
+            console.log(1)
+            Toast('图片过大')
+        }
     },
     zhuan(url){
         let self = this
         window.resolveLocalFileSystemURL(url, (fileEntry) => {
             fileEntry.file(function (file) {
-                console.log(file)
+                if(file.type.indexOf('image')!=-1&&file.size>5048576){
+                    Toast('图片过大')
+                }
+                if(file.type.indexOf('video')!=-1&&file.size>30485760){
+                    Toast('视频过大')
+                }
             var reader = new FileReader()
             reader.readAsArrayBuffer(file);
             reader.onload = function() {
@@ -450,14 +470,12 @@ export default {
                 type: file.type
             })
             if(file.type.indexOf('image')!=-1){
-                console.log(111)
                 if(file.type.indexOf('png')!=-1){
                     self.param.append('fileimg', imgBlob, file.name+'.png')
                 }else{
                     self.param.append('fileimg', imgBlob, file.name)
                 }
                     }else{
-                console.log(222)
                     self.param.append('filevideo', imgBlob, file.name)
                     }
                     }
@@ -479,16 +497,14 @@ export default {
         }
     },
     delipt(index){
-        this.ipt_arr.splice(1,index)
-        this.tags_id.splice(1,index)
+        console.log(index)
+        this.ipt_arr.splice(index,1)
+        this.tags_id.splice(index,1)
     },
     tags_check(val){
-        console.log(val)
         this.ipt_arr.push(val.name)
         this.tags_id.push(val.tid)
         this.tagsstate = false
-        console.log(this.ipt_arr)
-        console.log(this.tags_id)
     },
     delclass(){
         this.classesstate = true

@@ -1,5 +1,6 @@
 <template>
     <div class="My">
+    <ScrollContent ref="myscrollfull" class="my_scroll" @reload="my_reloadDatas" :mescrollValue="my_mescrollValue" @init="my_mescrollsInit">
     <div class="top">
         <img src="../assets/images/cd29fe54b110d82bbe16d8400e0383b6.jpg" alt="">
     </div>
@@ -20,7 +21,7 @@
             </div>
         </div>
         <div class="watch">
-            剩余观看次数：<span>8</span>/10
+            剩余观看次数：{{see}}
         </div>
         <div class="synopsis">
             个人简介 <span>(100字以内)</span>
@@ -127,6 +128,7 @@
                 </ScrollContent>
             </swiper-slide>
             <swiper-slide>
+                <ScrollContent ref="myscrollfull" @load="purchase_loadDatas" :mescrollValue="purchase_mescrollValue" @init="purchase_mescrollsInit">
                     <div class="wonderful_nav">
                         <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
@@ -140,15 +142,17 @@
                             </div>
                         </div>
                     </div>
+                </ScrollContent>
             </swiper-slide>
         </swiper>
     </div>
+    </ScrollContent>
     <foot :check_index='check_index'></foot>
     </div>
 </template>
 
 <script>
-import {myvideos,mylike,getmemberinfo} from '@/api/api'
+import {myvideos,mylike,mybuyvideos,getmemberinfo} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import  foot  from '@/components/Foot'
 import ScrollContent from '@/components/ScrollContent'
@@ -175,8 +179,10 @@ export default {
         works_index:1,
         love_index:1,
         purchase_index:1,
+        my_mescrollValue: {up: false, down: true},     //页面你是否需要下拉上拉加载
         works_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
         love_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        purchase_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
         username:'',
         nickname:'',
         introduce:'',
@@ -188,8 +194,11 @@ export default {
         fansnum:'',
         follownum:'',
         money:'',
-        fabulous:''
+        fabulous:'',
+        see:''
     }
+  },
+  watch: {
   },
   computed: {
     tab_myswiper() {
@@ -202,7 +211,7 @@ export default {
   methods: {
       getdata(){
           if(!sessionStorage.getItem('user')){
-              getmemberinfo(165).then(res=>{
+              getmemberinfo().then(res=>{
               console.log(res)
               if(res.data.resultCode == 0){
                 this.username = res.data.data.username
@@ -217,6 +226,7 @@ export default {
                 this.follownum = res.data.data.follownum
                 this.money = res.data.data.money
                 this.fabulous = res.data.data.fabulous
+                this.see = res.data.data.try_and_see
                 sessionStorage.setItem('user',JSON.stringify(res.data.data))
               }
           })
@@ -234,34 +244,49 @@ export default {
                 this.follownum = user.follownum
                 this.money = user.money
                 this.fabulous = user.fabulous
+                this.see = user.try_and_see
           }
           this.getMylove()
           this.getMyvideo()
+          this.getMybuy()
       },
     getMylove(){
-          mylike(this.love_index,161).then(res=>{
+          mylike(this.love_index).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 this.love_arr.push(...res.data.data.videos)
                 this.love_index = this.love_index+1
               }
                 if(res.data.data.videos.length == 0){
-                    Toast('没有更多了...')
+                    // Toast('没有更多了...')
                 }
                 this.love_mescrolls.endErr()
           })    
     },
     getMyvideo(){
-          myvideos(this.works_index,161).then(res=>{
+          myvideos(this.works_index).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 this.works_arr.push(...res.data.data.videos)
                 this.works_index = this.works_index+1
               }
                 if(res.data.data.videos.length == 0){
-                    Toast('没有更多了...')
+                    // Toast('没有更多了...')
                 }
                 this.works_mescrolls.endErr()
+          })
+    },
+    getMybuy(){
+        mybuyvideos(this.purchase_index).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                this.purchase_arr.push(...res.data.data.videos)
+                this.purchase_index = this.purchase_index+1
+              }
+                if(res.data.data.videos.length == 0){
+                    // Toast('没有更多了...')
+                }
+                this.purchase_mescrolls.endErr()
           })
     },
     tab_mycallback(){
@@ -288,6 +313,12 @@ export default {
           path: '/Single_video'
         })
     },
+    my_mescrollsInit (mescrolls) {
+        this.my_mescrolls = mescrolls;
+    },
+    my_reloadDatas(){
+        this.my_mescrolls.endErr()
+    },
     works_mescrollsInit (mescrolls) {
         this.works_mescrolls = mescrolls;
     },
@@ -299,12 +330,22 @@ export default {
     },
     love_loadDatas(){
         this.getMylove()
+    },
+    purchase_mescrollsInit (mescrolls) {
+        this.purchase_mescrolls = mescrolls;
+    },
+    purchase_loadDatas(){
+        this.getMybuy()
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+.My {
+    height: 100vh;
+    overflow-y: auto;
+}
 .swiper-slide {
     position: relative;
     height: 750px;
@@ -313,8 +354,9 @@ export default {
 }
 .top {
     width: 100%;
-    height: 152px;
-    overflow: hidden;
+    position: absolute;
+    left: 0px;
+    top: 0px;
 }
 .top img{
     width: 100%;
@@ -322,6 +364,9 @@ export default {
 .center {
     padding: 0px 30px;
     padding-bottom: 200px;
+    background-color: #1d0f11;
+    position: relative;
+    margin-top: 150px;
 }
 .center .user {
     width: 100%;
@@ -329,7 +374,7 @@ export default {
     font-size: 26px;
     color: #fff;
     align-items: center;
-    margin-bottom: 50px;
+    margin-bottom: 30px;
 }
 .center .user .userimg {
     width: 160px;
@@ -341,6 +386,8 @@ export default {
 }
 .center .user .userimg img {
     width: 100%;
+    height: 100%;
+    border-radius: 50%;
 }
 .center .user .user_box {
     flex: 1;
@@ -357,7 +404,7 @@ export default {
     font-weight: 600;
     text-align: center;
     line-height: 60px;
-    border: 1px solid #999999;
+    border: 2px solid #999999;
     color: #999999;
 }
 .center .watch {
@@ -381,7 +428,7 @@ export default {
     line-height: 36px;
     font-size: 22px;
     color: #999999;
-    border: 1px solid #2b2121;
+    border: 2px solid #2b2121;
 }
 .center .num {
     width: 100%;
@@ -557,6 +604,7 @@ export default {
     left: 10px;
     border-radius: 50%;
     overflow: hidden;
+    background-color: #fff;
 }
 .center .wonderful_nav .wonderful_li .wonderful_text{
     width: 90%;
@@ -577,5 +625,14 @@ export default {
     left: 0px;
 	bottom:80px;
 	height: 650px; /*如设置bottom:50px,则需height:auto才能生效*/
+}
+.my_scroll {
+    height: 100%;
+    top: 0px;
+    bottom: auto;
+    overflow-y: auto;
+}
+.swiper-slide {
+    padding: 0px 20px;
 }
 </style>

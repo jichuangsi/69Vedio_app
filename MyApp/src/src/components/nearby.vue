@@ -3,7 +3,7 @@
         <ScrollContent ref="myscrollfull" @reload="reloadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
         <div class="dz">
             <div><span></span>默认地址：{{dq}}</div>
-            <div>切换></div>
+            <!-- <div>切换></div> -->
         </div>
         <div class="follow_ul">
             <div class="follow_li" v-for="(item,index) in nearby_arr" :key="index" @click="personalgo(item.uid)">

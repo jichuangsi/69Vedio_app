@@ -1,7 +1,7 @@
 <template>
   <div class="index">
     <div class="top">
-        <div class="search">
+        <div class="search" @click="searchListgo">
         </div>
         <div class="title">
             <div :class="{tab_check:tab_check == 0}" @click="tabclick(0)">推荐<em></em></div>
@@ -78,7 +78,7 @@ export default {
         notice_arr:[],
         mescrollValue: {up: true, down: false},
         page:1,
-        followstatus: false
+        followstatus: false,
     };
   },
   computed: {
@@ -91,8 +91,6 @@ export default {
   },
   mounted() {
       this.initialize()
-      this.statusfollow()
-      this.getdata()
   },
   methods: {
     initialize() {
@@ -117,17 +115,19 @@ export default {
                 };
 
                 function onError(error) {
-                    console.log(111212);
                     console.log(error);
                 }
              }
             let a = enquip()
             setTimeout(function(){
-                if(!(sessionStorage.getItem('userid'))){
+                if(!(sessionStorage.getItem('usermessage'))){
                     register(a).then(res=>{
                         console.log(res)
                         if(res.data.resultCode == 0){
-                            sessionStorage.setItem('userid',res.data.data.userid)
+                            sessionStorage.setItem('usermessage',JSON.stringify(res.data.data))
+                            console.log(123456789)
+                            this.statusfollow()
+                            this.getdata()
                         }
                     }).catch(err=>{
                         console.log(err)
@@ -197,6 +197,11 @@ export default {
     },
     loadDatas(){
           this.getdata()
+    },
+    searchListgo(){
+        this.$router.push({
+             path:'/searchList'
+        })
     }
   }
 };

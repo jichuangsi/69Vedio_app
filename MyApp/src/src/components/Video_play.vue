@@ -2,11 +2,17 @@
     <div class="Video_play">
         <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
           <swiper-slide v-for="(item,index) in video_data" :key="index">
-            <video class="video_t" loop :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
+            <!-- <video :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
               <source :src="item.url" type="video/mp4">
+            </video> -->
+             <video class="video_t" loop :poster="item.thumbnail" v-if="item.url!=''" webkit-playsinline="" x5-playsinline="" playsinline="">
+              <source :src="item.url==''&&item.gold!=0?item.preview:item.url" type="video/mp4">
+            </video>
+            <video class="video_t" :poster="item.thumbnail" v-if="item.url==''" @ended="end_video" webkit-playsinline="" x5-playsinline="" playsinline="">
+              <source :src="item.url==''&&item.gold!=0?item.preview:item.url" type="video/mp4">
             </video>
             <div class="right_nav">
-            <div class="userimg" @click="personalgo(item.id)">
+            <div class="userimg" @click="personalgo(item.user_id)">
             <img :src="item.headimgurl" alt="">
             <span v-if="item.user_id != 0">+</span>
             </div>
@@ -21,6 +27,10 @@
             <div class="share">
             <span></span>
             <span>{{item.share}}</span>
+            </div>
+            <div class="gold" @click="buystatus= !buystatus">
+            <span></span>
+            <span>{{item.gold}}</span>
             </div>
             </div>
             <div class="information">
@@ -87,20 +97,40 @@
             </div>
         </div>
     </div>
+    <div class="bj" v-if="buystatus">
+        <div class="message_box">
+            <div class="title">
+                购买
+            </div>
+            <div class="text">
+                该视频需要<span>{{gold}}</span>金币才能观看全部精彩内容
+            </div>
+            <div class="my_money">
+                我的金币：{{user.money}}
+            </div>
+            <div class="btn">
+                <div @click="buystatus= !buystatus">取消</div>
+                <div @click="buyclick">购买</div>
+            </div>
+        </div>
+    </div>
+    <load v-if="!buybtn"></load>
     </div>
 </template>
 
 <script>
-import {homevideo ,videocollection,cancelcollection,getcomments,submitcomment} from '@/api/api'
+import {homevideo ,videocollection,cancelcollection,getcomments,submitcomment,buyvideo,tryandsee} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import ScrollContent from '@/components/ScrollContent'
+import load from '@/components/loading'
 import { Toast } from 'mint-ui';
 export default {
   name: 'Video_play',
   components: {
     swiper,
     swiperSlide,
-    ScrollContent
+    ScrollContent,
+    load
   },
   props: {
      video_num: {
@@ -129,7 +159,12 @@ export default {
         sendname:'',
         conntent:'',
         userid:'',
-        pid:''
+        pid:'',
+        buystatus:false,
+        gold:'',
+        buybtn:true,
+        swiper_arr:[],
+        user:''
     }
   },
   watch: {
@@ -137,27 +172,46 @@ export default {
           if(newval == 1){
               this.video_check.pause()
           }else{
-              this.video_check.play()
+              tryandsee(this.id).then(res=>{
+                if(res.data.resultCode == 0||res.data.resultCode == 9021){
+                    this.video_check.play()
+                }else{
+                    Toast(res.data.message)
+                }
+              })
           }
-      }
+      } 
   },
   computed: {
     Recommendswiper() {
       return this.$refs.Recommend.swiper
-    },
+    }
   },
   mounted () {
       let self = this
     if(sessionStorage.getItem('recommend_video')){
         self.video_data = JSON.parse(sessionStorage.getItem('recommend_video'))
-         setTimeout(function(){
-            self.video_arr = document.getElementsByClassName('video_t')
-            self.video_arr[sessionStorage.getItem('recommend_videoIndex')].play()
-            self.video_check = self.video_arr[sessionStorage.getItem('recommend_videoIndex')]
-        },500)
+        self.gold = self.video_data[sessionStorage.getItem('recommend_videoIndex')].gold
+        self.id = self.video_data[sessionStorage.getItem('recommend_videoIndex')].id
+        self.pageIndex = sessionStorage.getItem('recommend_page')
+        tryandsee(self.id).then(res=>{
+            if(res.data.resultCode == 0||res.data.resultCode == 9021){
+                self.video_arr = document.getElementsByClassName('video_t')
+                self.video_arr[sessionStorage.getItem('recommend_videoIndex')].play()
+                self.video_check = self.video_arr[sessionStorage.getItem('recommend_videoIndex')]
+                self.swiper_arr = document.getElementsByClassName('swiper-container')
+            }else{
+                    Toast(res.data.message)
+                }
+        })
     }else{
-        self.getdata(0)
+        setTimeout(function(){
+            self.getdata(0)
+        },2000)
     }
+    setTimeout(function(){
+        self.user = JSON.parse(sessionStorage.getItem('usermessage'))
+    },2000)
   },
   methods: {
       getdata(index){
@@ -166,15 +220,22 @@ export default {
             console.log(res)
             if(res.data.resultCode == 0&&res.data.data.videos.length!=0){
                 self.video_data.push(...res.data.data.videos)
-                self.pageIndex = res.data.data.page + 1
-                console.log(self.pageIndex)
+                self.pageIndex = self.pageIndex + 1
                 sessionStorage.setItem('recommend_video',JSON.stringify(self.video_data))
                 sessionStorage.setItem('recommend_videoIndex',index)
-                setTimeout(function(){
-                    self.video_arr = document.getElementsByClassName('video_t')
-                    self.video_arr[index].play()
-                    self.video_check = self.video_arr[index]
-                },500)
+                sessionStorage.setItem('recommend_page',self.pageIndex)
+                self.gold = self.video_data[index].gold
+                self.id = self.video_data[index].id
+                tryandsee(self.id).then(res=>{
+                    if(res.data.resultCode == 0||res.data.resultCode == 9021){
+                        self.video_arr = document.getElementsByClassName('video_t')
+                        self.video_arr[index].play()
+                        self.video_check = self.video_arr[index]
+                        self.swiper_arr = document.getElementsByClassName('swiper-container')
+                    }else{
+                        Toast(res.data.message)
+                    }
+                })
             }
         })
       },
@@ -183,7 +244,7 @@ export default {
               videocollection(val.id).then(res=>{
                   console.log(res)
                   if(res.data.resultCode == 0){
-                      Toast(res.data.message)
+                    //   Toast(res.data.message)
                       this.video_data[index].isgood = 1
                       this.video_data[index].good = this.video_data[index].good + 1
                       sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
@@ -193,7 +254,7 @@ export default {
               cancelcollection(val.id).then(res=>{
                   console.log(res)
                   if(res.data.resultCode == 0){
-                      Toast(res.data.message)
+                    //   Toast(res.data.message)
                       this.video_data[index].isgood = 0
                       this.video_data[index].good = this.video_data[index].good - 1
                       sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
@@ -202,13 +263,19 @@ export default {
           }
       },
     Recommendcallback(){
-        console.log(this.Recommendswiper.realIndex)
-        console.log(this.video_arr)
         for(let i = 0;i<this.video_arr.length;i++){
             if(this.Recommendswiper.realIndex == i){
-                this.video_arr[i].play()
-                this.video_check =this.video_arr[i]
-                sessionStorage.setItem('recommend_videoIndex',this.Recommendswiper.realIndex)
+                this.gold = this.video_data[i].gold
+                this.id = this.video_data[i].id
+                tryandsee(this.id).then(res=>{
+                    if(res.data.resultCode == 0||res.data.resultCode == 9021){
+                        this.video_arr[i].play()
+                        this.video_check =this.video_arr[i]
+                        sessionStorage.setItem('recommend_videoIndex',this.Recommendswiper.realIndex)
+                    }else{
+                        Toast(res.data.message)
+                    }
+                })
             }else{
                 this.video_arr[i].pause()
             }
@@ -247,9 +314,7 @@ export default {
         })
     },
     commentclick(id,userid){
-        document.getElementsByClassName('swiper-container')[0].style.zIndex = 3
-        document.getElementsByClassName('swiper-container')[1].style.zIndex = 3
-        document.getElementsByClassName('swiper-container')[2].style.zIndex = 3
+        this.xh(3)
         this.bottom_check = true
         this.id = id
         this.userid = userid
@@ -261,9 +326,7 @@ export default {
         this.c_arr = []
         this.message_index = 1
         this.c_index = 1
-        document.getElementsByClassName('swiper-container')[0].style.zIndex = 1
-        document.getElementsByClassName('swiper-container')[1].style.zIndex = 1
-        document.getElementsByClassName('swiper-container')[2].style.zIndex = 1
+        this.xh(1)
     },
     mescrollsInit (mescrolls) {
         this.mescrolls = mescrolls;
@@ -277,7 +340,7 @@ export default {
             if(res.data.resultCode == 0&&res.data.data.comments.length !=0){
                 this.f_arr[index].children = this.f_arr[index].children.length?this.f_arr[index].children:[]
                 this.f_arr[index].children.push(...res.data.data.comments)
-                this.c_index = this.c_index+1
+                this.c_index = res.data.data.currentPage+1
                 this.f_arr[index].c_status = false
             }
             if(res.data.data.comments.length == 0){
@@ -303,6 +366,44 @@ export default {
                     this.close()
                 }
             })
+        }
+    },
+    end_video(){
+        this.buystatus = this.video_data[sessionStorage.getItem('recommend_videoIndex')].gold!=0&&this.video_data[sessionStorage.getItem('recommend_videoIndex')].gold==''?false:true
+    },
+    buyclick(){
+        this.xh(7)
+        this.buybtn = false
+        buyvideo(this.id).then(res=>{
+            console.log(res)
+            if(res.data.resultCode == 0){
+                this.video_data[sessionStorage.getItem('recommend_videoIndex')].url = res.data.data
+                this.user.money = Number(this.user.money) - Number(this.gold)
+                sessionStorage.setItem('usermessage',JSON.stringify(this.user))
+                tryandsee(this.id).then(res=>{
+                    if(res.data.resultCode == 0||res.data.resultCode == 9021){
+                        this.video_arr = document.getElementsByClassName('video_t')
+                        this.video_arr[sessionStorage.getItem('recommend_videoIndex')].play()
+                        this.video_check = this.video_arr[sessionStorage.getItem('recommend_videoIndex')]
+                        sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
+                    }else{
+                        Toast(res.data.message)
+                    }
+                })
+            }
+            this.buybtn = true
+            this.buystatus = false
+            this.xh(1)
+            let message = res.data.message?res.data.message:res.data.error
+            Toast(message)
+        }).catch(err=>{
+            this.buybtn = true
+            this.xh(1)
+        })
+    },
+    xh(num){
+        for(let i = 0; i<this.swiper_arr.length;i++){
+            this.swiper_arr[i].style.zIndex = num
         }
     }
   }
@@ -380,6 +481,14 @@ export default {
     background-position: -16px -754px;
     margin-bottom: 10px;
 }
+.right_nav .gold span:first-child{
+    width: 65px;
+    height: 65px;
+    background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
+    background-size: 750px 4532px;
+    background-position: -16px -2649px;
+    margin-bottom: 10px;
+}
 .information {
     font-size: 30px;
     line-height: 46px;
@@ -415,6 +524,10 @@ export default {
     font-weight: 700;
     text-align: center;
     line-height: 46px;
+}
+.bottom_box .bottom_top .title {
+    font-size: 32px;
+    letter-spacing: 5px;
 }
 .bottom_box .bottom_top span {
     margin-right: 20px;
@@ -469,6 +582,8 @@ export default {
     line-height: 56px;
     display: flex;
     padding:0px 20px;
+    margin-bottom: 20px;
+    font-size: 28px;
     input {
         flex: 1;
         background-color: #99999954 !important;
@@ -487,7 +602,7 @@ export default {
     top: 0px;
     left: 0px;
     background-color: rgba(0,0,0,0.3);
-    z-index: 999;
+    z-index: 8;
 }
 .bj .btn {
     font-size: 32px;
@@ -508,6 +623,55 @@ export default {
     left: 0px;
 	top:0px;
     padding: 20px;
-	height: auto; /*如设置bottom:50px,则需height:auto才能生效*/
+	height: 100%; /*如设置bottom:50px,则需height:auto才能生效*/
+}
+
+.message_box {
+    width: 80%;
+    // background-color: rgba(197, 180, 180, 0.99);
+    background-color: #fff;
+    // border-radius: 10px;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.message_box .title {
+    font-size: 34px;
+    line-height: 86px;
+    padding-top: 10px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.message_box .text {
+    font-size: 28px;
+    line-height: 36px;
+    margin-bottom: 20px;
+    padding: 20px;
+    span {
+        color: #fbaf18;
+    }
+}
+.message_box .my_money {
+    text-align: center;
+    font-size: 28px;
+    line-height: 86px;
+    margin-bottom: 20px;
+    color: #fbaf18;
+}
+.message_box .btn {
+    font-size: 28px;
+    line-height: 76px;
+    display: flex;
+    border-bottom: none;
+}
+.message_box .btn div {
+    flex: 1;
+    border-top: 1px solid #666;
+    color: #333;
+}
+.message_box .btn div:first-child {
+    border-right: 1px solid #666;
 }
 </style>

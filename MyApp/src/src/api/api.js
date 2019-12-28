@@ -95,6 +95,18 @@ export function mylike(page,uid) {
   });
 }
 
+//获取购买列表
+export function mybuyvideos(page,uid) {
+  return axios({
+    method: 'POST',
+    url: `/Videoservice/mybuyvideos`,
+    data:{
+      page,
+      uid
+    }
+  });
+}
+
 //获取个人信息
 export function getmemberinfo(uid) {
   return axios({
@@ -360,6 +372,36 @@ export function submitcomment(vid,content,tid,pid) {
     url: `/Commentservice/submitcomment`,
     data:{
       vid,content,tid,pid
+    }
+  });
+}
+// Memberservice/buyvideo购买视频
+export function buyvideo(vid) {
+  return axios({
+    method: 'POST',
+    url: `/Memberservice/buyvideo`,
+    data:{
+      vid
+    }
+  });
+}
+// Videoservice/videosearch搜索
+export function videosearch(k,page) {
+  return axios({
+    method: 'POST',
+    url: `/Videoservice/videosearch`,
+    data:{
+      k,page
+    } 
+  });
+}
+// Memberservice/tryandsee获取点击
+export function tryandsee(vid) {
+  return axios({
+    method: 'POST',
+    url: `/Memberservice/tryandsee`,
+    data:{
+      vid
     }
   });
 }

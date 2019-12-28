@@ -14,7 +14,7 @@
             </div>
             <div class="nav">
                 <div v-for="(item,index) in popularrank_arr" :key="index">
-                    <span>top{{index}}</span>
+                    <span>top{{index+1}}</span>
                     <div class="img"><img :src="item.headimgurl" alt=""></div>
                     <span><em></em>{{item.goods}}</span>
                 </div>
@@ -249,7 +249,6 @@ export default {
     width: 156px;
     height: 156px;
     background-color: #999;
-    border-radius: 20px;
     font-size: 20px;
     color: #fff;
     display: flex;
@@ -417,6 +416,7 @@ export default {
     bottom: 10px;
     left: 10px;
     border-radius: 50%;
+    background-color: #fff;
     overflow: hidden;
 }
 .center .wonderful .wonderful_nav .wonderful_li .wonderful_text{

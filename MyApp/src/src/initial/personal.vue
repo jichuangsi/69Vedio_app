@@ -1,5 +1,6 @@
 <template>
     <div class="personal">
+    <ScrollContent ref="myscrollfull" class="my_scroll" @reload="my_reloadDatas" :mescrollValue="my_mescrollValue" @init="my_mescrollsInit">
     <div class="top">
         <div class="left" @click="back">
         </div>
@@ -82,6 +83,7 @@
             </swiper-slide>
         </swiper>
     </div>
+    </ScrollContent>
     </div>
 </template>
 
@@ -113,6 +115,7 @@ export default {
         ],
         works_index:1,
         love_index:1,
+        my_mescrollValue: {up: false, down: true},     //页面你是否需要下拉上拉加载
         works_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
         love_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
         username:'',
@@ -180,7 +183,7 @@ export default {
         })
     },
     getMylove(){
-          mylike(this.love_index,161).then(res=>{
+          mylike(this.love_index).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 this.love_arr.push(...res.data.data.videos)
@@ -193,7 +196,7 @@ export default {
           })    
     },
     getMyvideo(){
-          myvideos(this.works_index,161).then(res=>{
+          myvideos(this.works_index).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 this.works_arr.push(...res.data.data.videos)
@@ -223,6 +226,13 @@ export default {
           path: '/Single_video'
         })
     },
+    my_mescrollsInit (mescrolls) {
+        this.my_mescrolls = mescrolls;
+    },
+    my_reloadDatas(){
+        this.getdata()
+        this.my_mescrolls.endErr()
+    },
     works_mescrollsInit (mescrolls) {
         this.works_mescrolls = mescrolls;
     },
@@ -249,11 +259,22 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.personal {
+    height: 100vh;
+    overflow-y: auto;
+}
+.swiper-slide {
+    position: relative;
+    height: 750px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 .top {
     width: 100%;
     height: 200px;
-    overflow: hidden;
-    position: relative;
+    position: absolute;
+    left: 0px;
+    top: 0px;
 }
 .top img{
     width: 100%;
@@ -282,7 +303,9 @@ export default {
 .center {
     padding: 0px 30px;
     padding-bottom: 200px;
+    background-color: #100909;
     position: relative;
+    margin-top: 200px;
 }
 .center .user {
     width: 100%;
@@ -298,6 +321,7 @@ export default {
 }
 .center .user .userimg img {
     width: 160px;
+    height: 160px;
     margin-right: 26px;
     background-color: #fff;
     border-radius: 50%;
@@ -519,5 +543,20 @@ export default {
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	bottom:80px;
+	height: 650px; /*如设置bottom:50px,则需height:auto才能生效*/
+}
+.my_scroll {
+    height: 100%;
+    top: 0px;
+    bottom: auto;
+    overflow-y: auto;
+}
+.swiper-slide {
+    padding: 0px 20px;
 }
 </style>

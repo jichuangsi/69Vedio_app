@@ -5,21 +5,24 @@
         <div class="title">我的二维码</div>
     </div>
     <div class="center">
-        <div class="center_title">
-            <img src="../assets/images/微信图片_20191210111856.png" alt="">
-            <span>69短视频</span>
-        </div>
-        <div class="ewm">
-            <canvas id="QRCode"></canvas>
-        </div>
-        <div class="ipt" v-clipboard:copy="QRCodeMsg" 
-        v-clipboard:success="copy" 
-        v-clipboard:error="onError">
-            {{QRCodeMsg}}
-            <span>复制</span>
-        </div>
-        <div class="ts">
-            温馨提示：微信不能浏览。需要用浏览器才能浏览。
+        <div class="box">
+            <div class="center_title">
+                <img src="../assets/images/微信图片_20191210111856.png" alt="">
+                <span>69短视频</span>
+            </div>
+            <div class="ewm">
+                <canvas id="QRCode"></canvas>
+                <img :src="userimg" alt="">
+            </div>
+            <div class="ipt" v-clipboard:copy="QRCodeMsg" 
+            v-clipboard:success="copy" 
+            v-clipboard:error="onError">
+                {{QRCodeMsg}}
+                <span>复制</span>
+            </div>
+            <div class="ts">
+                温馨提示：微信不能浏览。需要用浏览器才能浏览。
+            </div>  
         </div>
     </div>
     </div>
@@ -34,6 +37,7 @@ export default {
   data() {
     return {
         QRCodeMsg: "",
+        userimg:''
     }
   },
   watch: {
@@ -48,7 +52,9 @@ export default {
     }
   },
   mounted () {
-      this.getdata()
+    this.getdata()
+    let user = JSON.parse(sessionStorage.getItem('user'))
+    this.userimg = user.headimgurl
   },
   methods: {
       getdata(){
@@ -111,6 +117,13 @@ export default {
 }
 .center {
     width: 100%;
+    position: relative;
+    .box {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+    }
     .center_title {
         font-size: 34px;
         color: #fff;
@@ -129,11 +142,20 @@ export default {
         margin-top: 40px;
         margin-bottom: 80px;
         padding: 68px 125px;
+        position: relative;
         canvas {
-            width: 300px !important;
-            height: 300px !important;
+            width: 400px !important;
+            height: 400px !important;
             display: block;
             margin: 0 auto;
+        }
+        img {
+            width: 80px;
+            height: 80px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
         }
     }
     .ipt {
