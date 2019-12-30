@@ -364,15 +364,57 @@ export default {
         // self.$refs.sp_video.src = 'file://'+ mp4Data
         self.bottom_check = false
         self.uploadbtn = false
-        window.resolveLocalFileSystemURL('file://'+ mp4Data, (fileEntry) => {
-        fileEntry.file(function (file) {
-            self.edit(file,'file://'+ mp4Data)
-        });
 
-        }, (err)=>{
-            console.log(6666)
-            console.log(err)
-        })
+
+          var permissions = cordova.plugins.permissions
+          permissions.checkPermission(
+            permissions.WRITE_EXTERNAL_STORAGE,
+            function(s) {
+              if (!s.hasPermission) {
+                //没有权限
+                //app申请写入权限
+                permissions.requestPermission(
+                  permissions.WRITE_EXTERNAL_STORAGE,
+                  function(s) {
+                    if (s.hasPermission) {
+                      //申请成功
+                      console.log('request WRITE_EXTERNAL_STORAGE success');
+
+                      window.resolveLocalFileSystemURL('file://'+ mp4Data, (fileEntry) => {
+                        fileEntry.file(function (file) {
+                          self.edit(file,'file://'+ mp4Data)
+                        });
+
+                      }, (err)=>{
+                        console.log(6666)
+                        console.log(err)
+                      })
+
+
+                    } else {
+                      console.log('request WRITE_EXTERNAL_STORAGE fail');
+                    }
+                  },
+                  function(error) {}
+                )
+              }else{
+                console.log('has WRITE_EXTERNAL_STORAGE already');
+
+                window.resolveLocalFileSystemURL('file://'+ mp4Data, (fileEntry) => {
+                  fileEntry.file(function (file) {
+                    self.edit(file,'file://'+ mp4Data)
+                  });
+
+                }, (err)=>{
+                  console.log(6666)
+                  console.log(err)
+                })
+
+              }
+            },
+            function(error) {}
+          );
+
         }
         function onFail(message) {
         console.log(message)
