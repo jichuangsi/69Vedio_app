@@ -269,7 +269,36 @@ export default {
             // self.$refs.sp_video.src = res[0].fullPath
             self.bottom_check = false
             self.uploadbtn = false
-            self.edit(res[0])
+            //self.edit(res[0])
+
+          var permissions = cordova.plugins.permissions
+          permissions.checkPermission(
+            permissions.WRITE_EXTERNAL_STORAGE,
+            function(s) {
+              if (!s.hasPermission) {
+                //没有权限
+                //app申请写入权限
+                permissions.requestPermission(
+                  permissions.WRITE_EXTERNAL_STORAGE,
+                  function(s) {
+                    if (s.hasPermission) {
+                      //申请成功
+                      console.log('request WRITE_EXTERNAL_STORAGE success');
+                      self.edit(res[0])
+                    } else {
+                      console.log('request WRITE_EXTERNAL_STORAGE fail');
+                    }
+                  },
+                  function(error) {}
+                )
+              }else{
+                console.log('has WRITE_EXTERNAL_STORAGE already');
+                self.edit(res[0])
+              }
+            },
+            function(error) {}
+          );
+
         }
 
 
@@ -389,6 +418,8 @@ export default {
     },
     edit(val,path){
         console.log(val)
+        console.log(path);
+        console.log(val.fullPath);
         let self = this
         let urlpath = path?path:val.fullPath
         if(val.size < 10485760){
@@ -397,11 +428,52 @@ export default {
             self.$refs.sp_video.src = urlpath
             self.uploadbtn = true
         }else{
-            let file = val;
+
+          console.log(urlpath);
+          window.resolveLocalFileSystemURL(
+            urlpath,
+            function(entry){
+              console.log(entry);
+              let fileurl = entry.toURL()
+              let videoFileName = val.name.split('.')[0];
+              let videoName = val.name
+              let ratio = (val.size/1048576)/10;
+              let expressed = ratio*1048576;
+              console.log(fileurl);
+              VideoEditor.transcodeVideo(
+                videoTranscodeSuccess,
+                videoTranscodeError,
+                {
+                  fileUri: fileurl,
+                  outputFileName: videoFileName,
+                  outputFileType: VideoEditorOptions.OutputFileType.MPEG4,
+                  optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES,
+                  saveToLibrary: true,
+                  maintainAspectRatio: true,
+                  // width: 640,
+                  // height: 640,
+                  videoBitrate: expressed, // 1 megabit
+                  fps: 30,
+                  audioChannels: 2,
+                  audioSampleRate: 44100,
+                  audioBitrate: 128000, // 128 kilobits
+                  progress: function(info) {
+                    console.log('transcodeVideo progress callback, info: ' + info);
+                  }
+                }
+              );
+            }
+          );
+            /*let file = val;
             let videoFileName = val.name.split('.')[0];
             let videoName = val.name
-            let ratio = (file.size/1048576)/15;
+            let ratio = (file.size/1048576)/10;
             let expressed = ratio*1048576;
+            urlpath = file.localURL;
+            console.log(file.localURL);
+            console.log(file.size);
+            console.log(ratio);
+            console.log(expressed);
             VideoEditor.transcodeVideo(
                     videoTranscodeSuccess,
                     videoTranscodeError,
@@ -415,6 +487,7 @@ export default {
                         // width: 640,
                         // height: 640,
                         videoBitrate: expressed, // 1 megabit
+                        fps: 30,
                         audioChannels: 2,
                         audioSampleRate: 44100,
                         audioBitrate: 128000, // 128 kilobits
@@ -422,9 +495,9 @@ export default {
                             console.log('transcodeVideo progress callback, info: ' + info);
                         }
                     }
-                );
+                );*/
         }
-            
+
             function videoTranscodeSuccess(result) {
                     self.filevideo = result
                     self.$refs.sp_video.src = result
