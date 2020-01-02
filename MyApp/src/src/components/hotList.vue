@@ -4,7 +4,7 @@
             <div class="left" @click="back"></div>
             <div class="title">{{title}}</div>
         </div>
-        <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+        <ScrollContent ref="myscrollfull" @load="loadDatas" @reload="newDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
         <div class="wonderful_nav">
             <div class="wonderful_li" v-for="(item,index) in data_arr" :key="index" @click="singleGo(item)">
                 <div class="wonderful_img">
@@ -26,6 +26,8 @@
 import {homevideo,latestvideos,payvideos,playmostvideos,commentmostvideos,likemostvideos} from '@/api/api'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
+import {mapGetters} from 'vuex'
+import store from '@/store';
 export default {
   name: 'hotList',
   components: {
@@ -35,9 +37,16 @@ export default {
     return {
         title:'',
         data_arr:[],
-        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        mescrollValue: {up: true, down: true},     //页面你是否需要下拉上拉加载
         page:1
     }
+  },
+  computed: {
+    //vuex 调用
+    ...mapGetters([
+      'latestVideosList',
+      'latestVideosPage'
+    ])
   },
   mounted () {
     this.title = this.$route.query.title
@@ -59,17 +68,32 @@ export default {
                 this.mescrolls.endErr()
               })
           }else if(this.title == '最新上传'){
-            latestvideos(this.page).then(res=>{
+            //console.log(store.getters.latestVideosList);
+            if(this.page==1&&this.latestVideosList&&this.latestVideosList.length>0){
+              this.page = this.latestVideosPage+1;
+              this.data_arr.push(...this.latestVideosList)
+              /*console.log(1);
+              console.log(this.page);
+              console.log(this.data_arr);*/
+            }else{
+              latestvideos(this.page).then(res=>{
                 console.log(res)
                 if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
-                    this.data_arr.push(...res.data.data.videos)
-                    this.page = this.page + 1
+                  store.commit('SET_LATEST_VIDEOS_PAGE', this.page);
+                  store.commit('SET_LATEST_VIDEOS_LIST', res.data.data.videos);
+                  this.data_arr.push(...res.data.data.videos)
+                  this.page = this.page + 1
                 }
                 if(res.data.data.videos.length == 0){
-                    Toast('没有更多视频了...')
+                  Toast('没有更多视频了...')
                 }
+                /*console.log(2);
+                console.log(this.page);
+                console.log(this.data_arr);*/
+
                 this.mescrolls.endErr()
-            })
+              })
+            }
           }else if(this.title == '金币专区'){
             payvideos(this.page).then(res=>{
                 console.log(res)
@@ -123,6 +147,16 @@ export default {
       loadDatas(){
           this.getdata()
       },
+      newDatas(){
+        if(this.title == '最新上传'){
+          this.page = 1;
+          this.data_arr = [];
+          store.commit('SET_LATEST_VIDEOS_PAGE', this.page);
+          store.commit('RESET__LATEST_VIDEOS_LIST', this.data_arr);
+          this.getdata();
+        }
+      },
+
     mescrollsInit (mescrolls) {
         this.mescrolls = mescrolls;
     },

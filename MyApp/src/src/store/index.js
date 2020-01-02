@@ -1,10 +1,11 @@
-import Vue from 'vue'
-
-import Vuex from 'vuex'
+import Vue from 'vue';
+import Vuex from 'vuex';
+import getters from './getters';
+import latestVideos from './modules/latestVideos';
 
 Vue.use(Vuex)
 
-const state = { 
+/*const state = {
     go_data: [],
     go_index: 0
 }
@@ -17,19 +18,16 @@ const mutations = {
     set_index(state,val){
         state.go_index = val
     }
-}
-
-const getters = {
- go_data: state => state.go_data,
- go_index: state => state.go_index
-}
+}*/
 
 export default new Vuex.Store({
 
- state,
+ /*state,
 
- mutations,
+ mutations,*/
 
+ modules:{
+   latestVideos,
+ },
  getters
-
 })
