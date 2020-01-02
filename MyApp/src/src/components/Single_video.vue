@@ -7,16 +7,16 @@
     </div>
         <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
           <swiper-slide v-for="(item,index) in video_data" :key="index">
-            <video loop :poster="item.thumbnail" v-if="item.url!=''">
+            <video loop :poster="item.thumbnail" v-if="item.url!=''" webkit-playsinline="true" playsinline="true">
               <source :src="item.url==''&&item.gold!=0?item.preview:item.url" type="video/mp4">
             </video>
-            <video :poster="item.thumbnail" v-if="item.url==''" @ended="end_video">
+            <video :poster="item.thumbnail" v-if="item.url==''" @ended="end_video" webkit-playsinline="true" playsinline="true">
               <source :src="item.url==''&&item.gold!=0?item.preview:item.url" type="video/mp4">
             </video>
             <div class="right_nav">
             <div class="userimg" @click="personalgo(item.user_id)">
             <img :src="item.headimgurl" alt="">
-            <span v-if="item.id != 0">+</span>
+            <span v-if="item.user_id != 0&&user.userid!=item.user_id">+</span>
             </div>
             <div class="love" :class="{love_check:item.isgood != 0}" @click="love(item,index)">
             <span></span>
@@ -42,8 +42,8 @@
             </div>
           </swiper-slide>
         </swiper>
-    <div class="bj" v-if="bottom_check">
-        <div class="bottom_box" :class="{bottom_check:bottom_check}">
+    <div class="bj" v-show="bottom_check">
+        <div class="bottom_box" ref="message" :class="{bottom_check:bottom_check}">
             <div class="bottom_top">
                 <div class="title">评论<span class="fr" @click="close">x</span></div>
             </div>
@@ -180,12 +180,10 @@ export default {
         self.video_arr[0].play()
         self.video_check = self.video_arr[0]
       }else{
-        Toast(res.data.message)
+        Toast(res.data.error)
       }
     })
-    setTimeout(function(){
         self.user = JSON.parse(sessionStorage.getItem('usermessage'))
-    },2000)
   },
   methods: {
     Recommendcallback(){
@@ -200,7 +198,7 @@ export default {
                         this.video_arr[i].play()
                         this.video_check =this.video_arr[i]
                     }else{
-                        Toast(res.data.message)
+                        Toast(res.data.error)
                     }
                 })
             }else{
@@ -209,7 +207,7 @@ export default {
         }
     },
     personalgo(val){
-        if(val != 0){
+        if(val != 0&&id != this.user.userid){
             this.$router.push({
              path:'/personal',
              query:{
@@ -261,6 +259,7 @@ export default {
             }
             if(res.data.data.comments.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
         })
@@ -271,6 +270,8 @@ export default {
         this.id = id
         this.userid = userid
         this.getmassage()
+        console.log(this.$refs.message)
+        this.$refs.message.style.position = 'absolute'
     }, 
     close(){
         this.bottom_check = false
@@ -279,6 +280,11 @@ export default {
         this.message_index = 1
         this.c_index = 1
         document.getElementsByClassName('swiper-container')[0].style.zIndex = 1
+        console.log(this.$refs.message)
+        this.sendname = ''
+        this.userid = ''
+        this.pid = ''
+        this.$refs.message.style.position = 'fixed'
     },
     mescrollsInit (mescrolls) {
         this.mescrolls = mescrolls;
@@ -338,7 +344,7 @@ export default {
                         this.video_check = this.video_arr[0]
                         sessionStorage.setItem('Single'+sessionStorage.getItem('frequency'),JSON.stringify(this.video_data))
                     }else{
-                        Toast(res.data.message)
+                        Toast(res.data.error)
                     }
                 })
             }

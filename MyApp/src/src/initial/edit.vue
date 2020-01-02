@@ -94,7 +94,7 @@
         </div>
     </div>
     <div class="bj" v-if="message">
-        <div class="message_box">
+        <div class="message_box" style="-webkit-user-select:text !important;">
             <div class="title">{{message_text}}</div>
             <input type="text" v-model="nickname" maxlength="8" v-if="message_index == 0">
             <input type="text" v-model="username" maxlength="10" v-if="message_index == 1" onkeyup="this.value=this.value.replace(/[^\w]/g,'');">
@@ -198,6 +198,7 @@ export default {
         this.param.append('birthday',this.birthday)
         this.param.append('region',this.dq_data)
         this.editbtn = false
+        console.log(this.param.get('fileimg').type)
         editmemberinfo(this.param).then(res=>{
             console.log(res)
             this.editbtn = true
@@ -262,13 +263,20 @@ export default {
         });
         function onSuccess(imageData) {
         console.log(imageData)
-        self.fileimg = imageData
+        if(device.platform == 'iOS'){
+            self.fileimg = 'cdvfile://localhost' + imageData
+        }else{
+            self.fileimg = imageData
+        }
         self.bottom_check = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
         fileEntry.file(function (file) {
             console.log(file)
             console.log(file.size)
-            if(file.size<1048576){
+            if(device.platform == 'iOS'){
+                self.fileimg = file.localURL
+            }
+            if(file.size<5048576){
                 self.zhuan(file.localURL)
             }else{
                 Toast('图片过大')
@@ -299,13 +307,22 @@ export default {
           encodingType: Camera.EncodingType.PNG
         });
         function onSuccess(imageData) {
-        self.fileimg = imageData
+            console.log(imageData)
+            console.log(device.platform)
+        if(device.platform == 'iOS'){
+            self.fileimg = 'cdvfile://localhost/' + imageData
+        }else{
+            self.fileimg = imageData
+        }
         self.bottom_check = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
         fileEntry.file(function (file) {
             console.log(file)
             console.log(file.size)
-            if(file.size<1048576){
+            if(device.platform == 'iOS'){
+                self.fileimg = file.localURL
+            }
+            if(file.size<5048576){
                 self.zhuan(file.localURL)
             }else{
                 Toast('图片过大')

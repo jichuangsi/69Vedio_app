@@ -1,8 +1,6 @@
 <template>
     <div class="news">
-        <div class="top">
-            <div class="title">消息</div>
-        </div>
+        <top :top_arr="top_arr"></top>
         <div class="tab_nav">
             <div :class="{tab_check:tab_check == 0}" @click="tabclick(0)">通知<em></em></div>
             <div :class="{tab_check:tab_check == 1}" @click="tabclick(1)">附近<em></em></div>
@@ -34,6 +32,7 @@ import  notice  from '@/components/notice'
 import  nearby  from '@/components/nearby'
 import  friend  from '@/components/friend'
 import  foot  from '@/components/Foot'
+import  top  from '@/components/top'
 export default {
   name: 'news',
   components: {
@@ -43,9 +42,11 @@ export default {
     nearby,
     friend,
     foot,
+    top
   },
   data() {
     return {
+      top_arr:{left:false,title:'消息',right:{title:'开始上传',url:false}},
       check_index:3,
       tab_check: 0,
       news:{

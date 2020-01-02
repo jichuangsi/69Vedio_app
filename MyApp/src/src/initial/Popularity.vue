@@ -1,14 +1,8 @@
 <template>
     <div class="Popularity">
-        <div class="top">
-            <div class="search">
-                <img src="../assets/images/工具箱.png" alt="">
-            </div>
-            <div class="title">
-                人气
-            </div>
-        </div>
+        <top :top_arr="top_arr"></top>
         <div class="center">
+        <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
             <div class="activity">
                 <img src="../assets/images/微信图片_20191212151058.png" alt="">
             </div>
@@ -93,7 +87,6 @@
                 <div class="h4">
                     发现精彩
                 </div>
-                <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
                 <div class="wonderful_nav">
                     <div class="wonderful_li" v-for="(item,index) in wonderful" :key="index" @click="singleGo(item)">
                         <div class="wonderful_img">
@@ -107,8 +100,8 @@
                         </div>
                     </div>
                 </div>
-                </ScrollContent>
             </div>
+            </ScrollContent>
         </div>
         <foot :check_index='check_index'></foot>
     </div>
@@ -119,14 +112,17 @@ import {popularrank,inviterank,uploadrand,homevideo} from '@/api/api'
 import  foot  from '@/components/Foot'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
+import  top  from '@/components/top'
 export default {
   name: 'Popularity',
   components: {
     foot,
-    ScrollContent
+    ScrollContent,
+    top
   },
   data() {
     return {
+       top_arr:{left:false,title:'人气',right:{title:'开始上传',url:false}},
         check_index:1,
         wonderful:[],
         popularrank_arr:[],
@@ -160,6 +156,7 @@ export default {
             }
             if(res.data.data.videos.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
         })
@@ -198,36 +195,8 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-.top {
-    width: 100%;
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    font-size: 34px;
-    font-weight: 600;
-    color: #fff;
-    z-index: 2;
-    background-color: #100909;
-}
-.top .search {
-    width: 60px;
-    position: absolute;
-    left: 46px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-.top .search img {
-    width: 100%;
-}
-.top .title {
-    text-align: center;
-    line-height: 78px;
-}
+<style scoped lang="scss">  
 .center {
-    padding: 95px 30px;
-    padding-bottom: 750px;
-    overflow-x: hidden;
     position: relative;
 }
 .center .activity {
@@ -380,7 +349,7 @@ export default {
      background-position: -16px -3925px;
 }
 .center .wonderful {
-    margin-bottom: 80px;
+    position: relative;
 }
 .center .wonderful .wonderful_nav {
     width: 100%;
@@ -444,8 +413,9 @@ export default {
 .mescroll {
     position: absolute;
     left: 0px;
-	bottom:140px;
-    padding: 0px 20px;
-	height: 650px; /*如设置bottom:50px,则需height:auto才能生效*/
+    // padding: 0px 20px;
+    height: 100vh; /*如设置bottom:50px,则需height:auto才能生效*/
+    padding: 175px 30px;
+    padding-top: 0px;
 }
 </style>

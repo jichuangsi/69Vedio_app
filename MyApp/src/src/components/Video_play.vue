@@ -5,16 +5,16 @@
             <!-- <video :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
               <source :src="item.url" type="video/mp4">
             </video> -->
-             <video class="video_t" loop :poster="item.thumbnail" v-if="item.url!=''" webkit-playsinline="" x5-playsinline="" playsinline="">
+             <video class="video_t" loop :poster="item.thumbnail" v-if="item.url!=''" webkit-playsinline="true" playsinline="true">
               <source :src="item.url==''&&item.gold!=0?item.preview:item.url" type="video/mp4">
             </video>
-            <video class="video_t" :poster="item.thumbnail" v-if="item.url==''" @ended="end_video" webkit-playsinline="" x5-playsinline="" playsinline="">
+            <video class="video_t" :poster="item.thumbnail" v-if="item.url==''" @ended="end_video" webkit-playsinline="true" playsinline="true">
               <source :src="item.url==''&&item.gold!=0?item.preview:item.url" type="video/mp4">
             </video>
             <div class="right_nav">
             <div class="userimg" @click="personalgo(item.user_id)">
             <img :src="item.headimgurl" alt="">
-            <span v-if="item.user_id != 0">+</span>
+            <span v-if="item.user_id != 0&&user.userid!=item.user_id">+</span>
             </div>
             <div class="love" :class="{love_check:item.isgood != 0}" @click="love(item,index)">
             <span></span>
@@ -40,8 +40,8 @@
             </div>
           </swiper-slide>
         </swiper>
-    <div class="bj" v-if="bottom_check">
-        <div class="bottom_box" :class="{bottom_check:bottom_check}">
+    <div class="bj" v-show="bottom_check">
+        <div class="bottom_box" ref="message" :class="{bottom_check:bottom_check}">
             <div class="bottom_top">
                 <div class="title">评论<span class="fr" @click="close">x</span></div>
             </div>
@@ -176,7 +176,7 @@ export default {
                 if(res.data.resultCode == 0||res.data.resultCode == 9021){
                     this.video_check.play()
                 }else{
-                    Toast(res.data.message)
+                    Toast(res.data.error)
                 }
               })
           }
@@ -201,17 +201,13 @@ export default {
                 self.video_check = self.video_arr[sessionStorage.getItem('recommend_videoIndex')]
                 self.swiper_arr = document.getElementsByClassName('swiper-container')
             }else{
-                    Toast(res.data.message)
+                    Toast(res.data.error)
                 }
         })
     }else{
-        setTimeout(function(){
-            self.getdata(0)
-        },2000)
+        self.getdata(0)
     }
-    setTimeout(function(){
-        self.user = JSON.parse(sessionStorage.getItem('usermessage'))
-    },2000)
+    self.user = JSON.parse(sessionStorage.getItem('usermessage'))
   },
   methods: {
       getdata(index){
@@ -233,7 +229,7 @@ export default {
                         self.video_check = self.video_arr[index]
                         self.swiper_arr = document.getElementsByClassName('swiper-container')
                     }else{
-                        Toast(res.data.message)
+                        Toast(res.data.error)
                     }
                 })
             }
@@ -273,7 +269,7 @@ export default {
                         this.video_check =this.video_arr[i]
                         sessionStorage.setItem('recommend_videoIndex',this.Recommendswiper.realIndex)
                     }else{
-                        Toast(res.data.message)
+                        Toast(res.data.error)
                     }
                 })
             }else{
@@ -285,7 +281,7 @@ export default {
       }
     },
     personalgo(id){
-        if(id != 0){
+        if(id != 0&&id != this.user.userid){
             this.$router.push({
              path:'/personal',
              query:{
@@ -309,6 +305,7 @@ export default {
             }
             if(res.data.data.comments.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
         })
@@ -319,6 +316,8 @@ export default {
         this.id = id
         this.userid = userid
         this.getmassage()
+        console.log(this.$refs.message)
+        this.$refs.message.style.position = 'absolute'
     }, 
     close(){
         this.bottom_check = false
@@ -326,7 +325,11 @@ export default {
         this.c_arr = []
         this.message_index = 1
         this.c_index = 1
+        this.sendname = ''
+        this.userid = ''
+        this.pid = ''
         this.xh(1)
+        this.$refs.message.style.position = 'fixed'
     },
     mescrollsInit (mescrolls) {
         this.mescrolls = mescrolls;
@@ -361,8 +364,6 @@ export default {
                 console.log(res)
                 Toast(res.data.message)
                 if(res.data.resultCode==0){
-                    this.sendname = ''
-                    this.pid = ''
                     this.close()
                 }
             })
@@ -387,7 +388,7 @@ export default {
                         this.video_check = this.video_arr[sessionStorage.getItem('recommend_videoIndex')]
                         sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
                     }else{
-                        Toast(res.data.message)
+                        Toast(res.data.error)
                     }
                 })
             }
@@ -422,7 +423,7 @@ export default {
     background-color: #100909;
 }
 .right_nav {
-    position: fixed;
+    position: absolute;
     right: 27px;
     bottom: 228px;
 }
@@ -494,7 +495,7 @@ export default {
     line-height: 46px;
     width: 60%;
     color: #fff;
-    position: fixed;
+    position: absolute;
     left: 30px;
     bottom: 126px;
 }

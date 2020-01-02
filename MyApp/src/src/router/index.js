@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Blank from '@/components/Blank'
 import Index from '@/initial/Index'
 import My from '@/initial/My'
 import Popularity from '@/initial/Popularity'
@@ -28,6 +29,7 @@ import ranking from '@/components/ranking'
 import notify from '@/components/notify'
 import messageList from '@/components/messageList'
 import searchList from '@/components/searchList'
+import top from '@/components/top'
 import Foot from '@/components/Foot'
 
 Vue.use(Router)
@@ -36,6 +38,11 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'Blank',
+      component: Blank
+    },
+    {
+      path: '/Index',
       name: 'Index',
       component: Index
     },
@@ -173,6 +180,11 @@ export default new Router({
       path: '/searchList',
       name: 'searchList',
       component: searchList
+    },
+    {
+      path: '/top',
+      name: 'top',
+      component: top
     },
     {
       path: '/Foot',

@@ -15,9 +15,9 @@ import 'mint-ui/lib/style.css'
 import './assets/style/reset.css'
 Vue.use(MintUI)
 
-import Vconsole from 'vconsole'
-const vConsole = new Vconsole()
-Vue.use(vConsole) 
+// import Vconsole from 'vconsole'
+// const vConsole = new Vconsole()
+// Vue.use(vConsole) 
 
 import VueClipboard from 'vue-clipboard2'
 Vue.use(VueClipboard)

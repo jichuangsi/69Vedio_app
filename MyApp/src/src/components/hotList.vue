@@ -1,9 +1,7 @@
 <template>
     <div class="hotList">
-        <div class="top">
-            <div class="left" @click="back"></div>
-            <div class="title">{{title}}</div>
-        </div>
+        <top :top_arr="top_arr"></top>
+        <div class="center">
         <ScrollContent ref="myscrollfull" @load="loadDatas" @reload="newDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
         <div class="wonderful_nav">
             <div class="wonderful_li" v-for="(item,index) in data_arr" :key="index" @click="singleGo(item)">
@@ -16,9 +14,10 @@
                 <div class="wonderful_text">
                     {{item.title}}
                 </div>
-            </div>
         </div>
+            </div>
         </ScrollContent>
+        </div>
     </div>
 </template>
 
@@ -26,15 +25,18 @@
 import {homevideo,latestvideos,payvideos,playmostvideos,commentmostvideos,likemostvideos} from '@/api/api'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
+import  top  from '@/components/top'
 import {mapGetters} from 'vuex'
 import store from '@/store';
 export default {
   name: 'hotList',
   components: {
     ScrollContent,
+    top
     },
   data() {
     return {
+        top_arr:{left:true,title:'人气',right:{title:'开始上传',url:false}},
         title:'',
         data_arr:[],
         mescrollValue: {up: true, down: true},     //页面你是否需要下拉上拉加载
@@ -44,11 +46,22 @@ export default {
   computed: {
     //vuex 调用
     ...mapGetters([
+      'homeVideosList',
+      'homeVideosPage',
       'latestVideosList',
-      'latestVideosPage'
+      'latestVideosPage',
+      'payVideosList',
+      'payVideosPage',
+      'playVideosList',
+      'playVideosPage',
+      'commentVideosList',
+      'commentVideosPage',
+      'likeVideosList',
+      'likeVideosPage'
     ])
   },
   mounted () {
+    this.top_arr.title = this.$route.query.title
     this.title = this.$route.query.title
     console.log(this.title)
     this.getdata()
@@ -56,17 +69,25 @@ export default {
   methods: {
       getdata(){
           if(this.title == '官方推荐'){
+            if(this.page==1&&this.homeVideosList&&this.homeVideosList.length>0){
+              this.page = this.homeVideosPage+1;
+              this.data_arr.push(...this.homeVideosList)
+            }else{
               homevideo(this.page).then(res=>{
                 console.log(res)
                 if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                  store.commit('SET_HOME_VIDEOS_PAGE', this.page);
+                  store.commit('SET_HOME_VIDEOS_LIST', res.data.data.videos);
                     this.data_arr.push(...res.data.data.videos)
                     this.page = this.page + 1
                 }
                 if(res.data.data.videos.length == 0){
                     Toast('没有更多视频了...')
+                    this.mescrolls.endByPage(0,1)
                 }
                 this.mescrolls.endErr()
               })
+            }
           }else if(this.title == '最新上传'){
             //console.log(store.getters.latestVideosList);
             if(this.page==1&&this.latestVideosList&&this.latestVideosList.length>0){
@@ -86,6 +107,7 @@ export default {
                 }
                 if(res.data.data.videos.length == 0){
                   Toast('没有更多视频了...')
+                    this.mescrolls.endByPage(0,1)
                 }
                 /*console.log(2);
                 console.log(this.page);
@@ -95,66 +117,113 @@ export default {
               })
             }
           }else if(this.title == '金币专区'){
-            payvideos(this.page).then(res=>{
-                console.log(res)
-                if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
-                    this.data_arr.push(...res.data.data.videos)
-                    this.page = this.page + 1
-                }
-                if(res.data.data.videos.length == 0){
-                    Toast('没有更多视频了...')
-                }
-                this.mescrolls.endErr()
-            })
+            if(this.page==1&&this.payVideosList&&this.payVideosList.length>0){
+              this.page = this.payVideosPage+1;
+              this.data_arr.push(...this.payVideosList)
+            }else{
+                payvideos(this.page).then(res=>{
+                    console.log(res)
+                    if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                        store.commit('SET_PAY_VIDEOS_PAGE', this.page);
+                        store.commit('SET_PAY_VIDEOS_LIST', res.data.data.videos);
+                        this.data_arr.push(...res.data.data.videos)
+                        this.page = this.page + 1
+                    }
+                    if(res.data.data.videos.length == 0){
+                        Toast('没有更多视频了...')
+                        this.mescrolls.endByPage(0,1)
+                    }
+                    this.mescrolls.endErr()
+                })
+            }
           }else if(this.title == '最多播放'){
-            playmostvideos(this.page).then(res=>{
-                console.log(res)
-                if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
-                    this.data_arr.push(...res.data.data.videos)
-                    this.page = this.page + 1
-                }
-                if(res.data.data.videos.length == 0){
-                    Toast('没有更多视频了...')
-                }
-                this.mescrolls.endErr()
-            })
+            if(this.page==1&&this.playVideosList&&this.playVideosList.length>0){
+              this.page = this.playVideosPage+1;
+              this.data_arr.push(...this.playVideosList)
+            }else{
+                playmostvideos(this.page).then(res=>{
+                    console.log(res)
+                    if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                        store.commit('SET_PLAY_VIDEOS_PAGE', this.page);
+                        store.commit('SET_PLAY_VIDEOS_LIST', res.data.data.videos);
+                        this.data_arr.push(...res.data.data.videos)
+                        this.page = this.page + 1
+                    }
+                    if(res.data.data.videos.length == 0){
+                        Toast('没有更多视频了...')
+                        this.mescrolls.endByPage(0,1)
+                    }
+                    this.mescrolls.endErr()
+                })
+            }
           }else if(this.title == '最多评论'){
-            commentmostvideos(this.page).then(res=>{
-                console.log(res)
-                if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
-                    this.data_arr.push(...res.data.data.videos)
-                    this.page = this.page + 1
-                }
-                if(res.data.data.videos.length == 0){
-                    Toast('没有更多视频了...')
-                }
-                this.mescrolls.endErr()
-            })
+            if(this.page==1&&this.commentVideosList&&this.commentVideosList.length>0){
+              this.page = this.commentVideosPage+1;
+              this.data_arr.push(...this.commentVideosList)
+            }else{
+                commentmostvideos(this.page).then(res=>{
+                    console.log(res)
+                    if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                        store.commit('SET_COMMENT_VIDEOS_PAGE', this.page);
+                        store.commit('SET_COMMENT_VIDEOS_LIST', res.data.data.videos);
+                        this.data_arr.push(...res.data.data.videos)
+                        this.page = this.page + 1
+                    }
+                    if(res.data.data.videos.length == 0){
+                        Toast('没有更多视频了...')
+                        this.mescrolls.endByPage(0,1)
+                    }
+                    this.mescrolls.endErr()
+                })
+            }
           }else if(this.title == '最多点赞'){
-            likemostvideos(this.page).then(res=>{
-                console.log(res)
-                if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
-                    this.data_arr.push(...res.data.data.videos)
-                    this.page = this.page + 1
-                }
-                if(res.data.data.videos.length == 0){
-                    Toast('没有更多视频了...')
-                }
-                this.mescrolls.endErr()
-            })
+            if(this.page==1&&this.likeVideosList&&this.likeVideosList.length>0){
+              this.page = this.likeVideosPage+1;
+              this.data_arr.push(...this.likeVideosList)
+            }else{
+                likemostvideos(this.page).then(res=>{
+                    console.log(res)
+                    if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                        store.commit('SET_LIKE_VIDEOS_PAGE', this.page);
+                        store.commit('SET_LIKE_VIDEOS_LIST', res.data.data.videos);
+                        this.data_arr.push(...res.data.data.videos)
+                        this.page = this.page + 1
+                    }
+                    if(res.data.data.videos.length == 0){
+                        Toast('没有更多视频了...')
+                        this.mescrolls.endByPage(0,1)
+                    }
+                    this.mescrolls.endErr()
+                })
+            }
           }
       },
       loadDatas(){
           this.getdata()
       },
       newDatas(){
-        if(this.title == '最新上传'){
-          this.page = 1;
-          this.data_arr = [];
-          store.commit('SET_LATEST_VIDEOS_PAGE', this.page);
-          store.commit('RESET__LATEST_VIDEOS_LIST', this.data_arr);
-          this.getdata();
-        }
+        this.page = 1;
+        this.data_arr = [];
+          if(this.title == '官方推荐'){
+            store.commit('SET_HOME_VIDEOS_PAGE', this.page);
+            store.commit('RESET__HOME_VIDEOS_LIST', this.data_arr);
+          }else if(this.title == '最新上传'){
+            store.commit('SET_LATEST_VIDEOS_PAGE', this.page);
+            store.commit('RESET__LATEST_VIDEOS_LIST', this.data_arr);
+          }else if(this.title == '金币专区'){
+            store.commit('SET_PAY_VIDEOS_PAGE', this.page);
+            store.commit('RESET__PAY_VIDEOS_LIST', this.data_arr);
+          }else if(this.title == '最多播放'){
+            store.commit('SET_PLAY_VIDEOS_PAGE', this.page);
+            store.commit('RESET__PLAY_VIDEOS_LIST', this.data_arr);
+          }else if(this.title == '最多评论'){
+            store.commit('SET_COMMENT_VIDEOS_PAGE', this.page);
+            store.commit('RESET__COMMENT_VIDEOS_LIST', this.data_arr);
+          }else if(this.title == '最多点赞'){
+            store.commit('SET_LIKE_VIDEOS_PAGE', this.page);
+            store.commit('RESET__LIKE_VIDEOS_LIST', this.data_arr);
+          }
+        this.getdata();
       },
 
     mescrollsInit (mescrolls) {
@@ -176,47 +245,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.top {
-    width: 100%;
-    border-bottom: 1px solid #211a1a;
-    background-color: #100909;
+.center {
     position: relative;
-}
-.top .title{
-    text-align: center;
-    font-size: 42px;
-    line-height: 80px;
-    color: #fff;
-    font-weight: 600;
-}
-.top .left {
-    width: 19px;
-    height: 36px;
-    background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
-    background-size: 750px 4532px;
-    background-position: -16px -2147px;
-    padding: 0px 20px;
-    position: absolute;
-    left: 30px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-.top .right {
-    position: absolute;
-    right: 30px;
-    bottom: 20px;
-    font-size: 26px;
-    color: #999999;
-}
-.top img {
-    width: 100%;
-    display: block;
 }
 .mescroll {
 	position: absolute;
-	top: 100px;
-	bottom: 0;
-	height: auto; /*如设置bottom:50px,则需height:auto才能生效*/
+	top: 0px;
+    left: 0px;
+	height: 100vh; /*如设置bottom:50px,则需height:auto才能生效*/
+    padding-bottom: 80px;
 }
 .wonderful_nav {
     width: 100%;

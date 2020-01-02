@@ -1,10 +1,6 @@
 <template>
     <div class="Upload">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">上传视频</div>
-        <div class="right" @click="myupload">我的上传</div>
-    </div>
+    <top :top_arr="top_arr"></top>
     <div class="center">
         <div class="video_title">
             <div class="h4">
@@ -22,7 +18,7 @@
                 <div class="file_box" @click="bottom_box('拍摄视频')">
                     <div class="add">+</div>
                     <div>上传视频</div>
-                    <video loop v-if="filevideo">
+                    <video v-if="filevideo">
                         <source :src="filevideo" type="video/mp4">
                     </video>
                     <!-- <input type="file" name="" id="video" @change="videochange"> -->
@@ -119,13 +115,16 @@ import axios from 'axios'
 import {upload,gettags,getclasses} from '@/api/api'
 import { Toast } from 'mint-ui';
 import load from '@/components/loading'
+import  top  from '@/components/top'
 export default {
   name: 'Upload',
   components: {
-      load
+      load,
+      top
   },
   data() {
     return {
+      top_arr:{left:true,title:'上传视频',right:{title:'我的上传',url:'/myupload'}},
       ipt_arr: [],
       bottom_check:false,
       Agreement_state:true,
@@ -188,8 +187,6 @@ export default {
               self.param.append('gold',self.money)
               self.param.append('tags',a)
               self.param.append('class',self.classes_id)
-              console.log(self.param.get('tags'))
-              console.log(self.param.get('class'))
             upload(self.param).then(res=>{
                 console.log(res)
                 Toast(res.data.message)
@@ -222,16 +219,10 @@ export default {
     onDeviceReady(val) {
       this.ready = true;
     },
-    back(){
-      window.history.go(-1)
-    },
     addipt(){
       if(this.ipt_arr.length<5){
         this.tagsstate = true
       }
-    },
-    myupload(){
-       this.$router.push({ path:'/myupload' })
     },
     bottom_box(val){
         this.bottom_check = true
@@ -269,8 +260,11 @@ export default {
             // self.$refs.sp_video.src = res[0].fullPath
             self.bottom_check = false
             self.uploadbtn = false
-            //self.edit(res[0])
+            console.log(res)
 
+        if(device.platform == 'iOS'){
+            self.edit(res[0])
+        }else{
           var permissions = cordova.plugins.permissions
           permissions.checkPermission(
             permissions.WRITE_EXTERNAL_STORAGE,
@@ -298,7 +292,7 @@ export default {
             },
             function(error) {}
           );
-
+        }
         }
 
 
@@ -320,14 +314,26 @@ export default {
         });
         function onSuccess(imageData) {
         console.log(imageData)
-        // self.fileimg = imageData
+        if(device.platform == 'iOS'){
+            self.fileimg = 'cdvfile://localhost/' + imageData
+        }else{
+            self.fileimg = imageData
+        }
         self.bottom_check = false
-        self.uploadbtn = false
+        // self.uploadbtn = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
         fileEntry.file(function (file) {
             console.log(file)
             console.log(file.size)
-            self.zp_edit(file,imageData)
+            if(device.platform == 'iOS'){
+                self.fileimg = file.localURL
+            }
+            // self.zp_edit(file,imageData)
+            if(file.size<5048576){
+            self.zhuan(imageData)
+            }else{
+            Toast('图片过大')
+            }
         });
         }, (err)=>{
             console.log(6666)
@@ -361,11 +367,21 @@ export default {
         });
         function onSuccess(mp4Data) {
         // self.filevideo = 'file://'+ mp4Data
-        // self.$refs.sp_video.src = 'file://'+ mp4Data
+        // self.$refs.sp_video.src = mp4Data
+        console.log(mp4Data)
         self.bottom_check = false
-        self.uploadbtn = false
-
-
+        // self.uploadbtn = false
+        console.log(device.platform)
+        if(device.platform == 'iOS'){
+            window.resolveLocalFileSystemURL( mp4Data, (fileEntry) => {
+                fileEntry.file(function (file) {
+                  self.edit(file,mp4Data)
+                });
+              }, (err)=>{
+                console.log(6666)
+                console.log(err)
+            })
+        }else{
           var permissions = cordova.plugins.permissions
           permissions.checkPermission(
             permissions.WRITE_EXTERNAL_STORAGE,
@@ -379,7 +395,6 @@ export default {
                     if (s.hasPermission) {
                       //申请成功
                       console.log('request WRITE_EXTERNAL_STORAGE success');
-
                       window.resolveLocalFileSystemURL('file://'+ mp4Data, (fileEntry) => {
                         fileEntry.file(function (file) {
                           self.edit(file,'file://'+ mp4Data)
@@ -416,11 +431,13 @@ export default {
           );
 
         }
+        }
         function onFail(message) {
         console.log(message)
         self.bottom_check = false
           //Toast("选择视频，原因为: " + message);
         }
+        
         }else{
         }
     },
@@ -436,14 +453,27 @@ export default {
           encodingType: Camera.EncodingType.PNG
         });
         function onSuccess(imageData) {
-        // self.fileimg = imageData
         self.bottom_check = false
-        self.uploadbtn = false
+        if(device.platform == 'iOS'){
+            self.fileimg = 'cdvfile://localhost/' + imageData
+        }else{
+            self.fileimg = imageData
+        }
+        console.log(imageData)
+        // self.uploadbtn = false
         window.resolveLocalFileSystemURL(imageData, (fileEntry) => {
         fileEntry.file(function (file) {
             console.log(file)
             console.log(file.size)
-            self.zp_edit(file,imageData)
+            // self.zp_edit(file,imageData)
+            if(device.platform == 'iOS'){
+                self.fileimg = file.localURL
+            }
+            if(file.size<5048576){
+            self.zhuan(imageData)
+            }else{
+            Toast('图片过大')
+            }
         });
         }, (err)=>{
             console.log(6666)
@@ -463,7 +493,11 @@ export default {
         console.log(path);
         console.log(val.fullPath);
         let self = this
-        let urlpath = path?path:val.fullPath
+        if(device.platform == 'iOS'){
+            let urlpath = path?path:val.localURL
+        }else{
+            let urlpath = path?path:val.fullPath
+        }
         if(val.size < 10485760){
             self.zhuan(urlpath)
             self.filevideo = urlpath
@@ -634,6 +668,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.Upload {
+    min-height: calc(100% + 1px)
+}
 .top {
     width: 100%;
     border-bottom: 1px solid #211a1a;

@@ -1,9 +1,6 @@
 <template>
     <div class="cash">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">金币提现</div>
-    </div>
+        <top :top_arr="top_arr"></top>
     <div class="center">
         <div class="text">
             <div>视频收益 <span>0</span>（可提现）</div><span>1元=10金币</span>
@@ -38,10 +35,15 @@
 </template>
 
 <script>
+import  top  from '@/components/top'
 export default {
   name: 'cash',
+  components: {
+    top
+  },
   data() {
     return {
+        top_arr:{left:true,title:'金币提现',right:{title:'',url:false}},
     }
   },
   mounted () {

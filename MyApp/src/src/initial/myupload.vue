@@ -1,10 +1,6 @@
 <template>
     <div class="myupload">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">我的上传</div>
-        <div class="right" @click="Upload">开始上传</div>
-    </div>
+    <top :top_arr="top_arr"></top>
     <div class="center">
         <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
         <div class="wonderful_nav">
@@ -29,13 +25,16 @@
 import {myvideos} from '@/api/api'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
+import  top  from '@/components/top'
 export default {
   name: 'myupload',
   components: {
-    ScrollContent
+    ScrollContent,
+    top
   },
   data() {
     return {
+       top_arr:{left:true,title:'我的上传',right:{title:'开始上传',url:'/myupload'}},
         purchase_arr:[],
         mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
         page:1
@@ -54,6 +53,7 @@ export default {
             }
             if(res.data.data.videos.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
         }).catch(err=>{

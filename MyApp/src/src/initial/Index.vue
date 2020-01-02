@@ -90,52 +90,38 @@ export default {
     }
   },
   mounted() {
-      this.initialize()
+    this.initialize()
+    this.statusfollow()
+    this.getdata()
   },
   methods: {
     initialize() {
         let self = this
-      document.addEventListener(
-        "deviceready",
-        function(){
-             if(!sessionStorage.getItem('dq')){
-                 let options = {
-                    enableHighAccuracy: true,
-                    maximumAge: 3600000
-                }
-                    
-                let watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+        document.addEventListener(
+            "deviceready",
+            function(){
+                if(!sessionStorage.getItem('dq')){
+                    let options = {
+                        enableHighAccuracy: true,
+                        maximumAge: 3600000
+                    }
+                        
+                    let watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
 
-                function onSuccess(position) {
-                        locate(position.coords.latitude,position.coords.longitude,position.coords.accuracy,position.timestamp).then(res=>{
-                            if(res.data.resultCode == 0){
-                                sessionStorage.setItem('dq',res.data.data)
-                            }
-                        })
-                };
+                    function onSuccess(position) {
+                            locate(position.coords.latitude,position.coords.longitude,position.coords.accuracy,position.timestamp).then(res=>{
+                                if(res.data.resultCode == 0){
+                                    sessionStorage.setItem('dq',res.data.data)
+                                }
+                            })
+                    };
 
-                function onError(error) {
-                    console.log(error);
+                    function onError(error) {
+                        console.log(error);
+                    }
                 }
-             }
-            let a = enquip()
-            setTimeout(function(){
-                if(!(sessionStorage.getItem('usermessage'))){
-                    register(a).then(res=>{
-                        console.log(res)
-                        if(res.data.resultCode == 0){
-                            sessionStorage.setItem('usermessage',JSON.stringify(res.data.data))
-                            console.log(123456789)
-                            this.statusfollow()
-                            this.getdata()
-                        }
-                    }).catch(err=>{
-                        console.log(err)
-                    })
-                }
-            },500)
-        }
-      )
+            }
+        )
     },
     AllIndexcallback(){
       this.tab_check = this.AllIndexswiper.realIndex
@@ -169,6 +155,7 @@ export default {
             }
             if(res.data.data.members.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
         })

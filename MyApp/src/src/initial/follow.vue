@@ -327,6 +327,9 @@ export default {
 }
 .user_li .user img {
   width: 66px;
+  height: 66px;
+  background-color: #fff;
+  border-radius: 50%;
   margin: 0px 20px;
 }
 .user_li .user div {

@@ -84,6 +84,7 @@ export default {
             }
             if(res.data.data.videos.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
         })

@@ -65,6 +65,7 @@ export default {
             }
             if(res.data.data.goods.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
           })
@@ -78,6 +79,7 @@ export default {
             }
             if(res.data.data.comments.length == 0){
                 Toast('没有更多了...')
+                this.mescrolls.endByPage(0,1)
             }
             this.mescrolls.endErr()
           })

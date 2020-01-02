@@ -19,7 +19,7 @@ export default {
     return {
       arr:[
         {
-          url:"",
+          url:"Index",
           title:'首页'
         },
         {

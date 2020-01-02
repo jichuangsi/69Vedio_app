@@ -6,16 +6,19 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  mounted () {
+  }
 }
 </script>
 
-<style>
+<style scoped lang="scss">
   #app {
     width: 100%;
     height: 100vh;
     background-color: #100909;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling:touch;
   }
 </style>

@@ -1,9 +1,6 @@
 <template>
     <div class="Extension">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">我的二维码</div>
-    </div>
+        <top :top_arr="top_arr"></top>
     <div class="center">
         <div class="box">
             <div class="center_title">
@@ -32,10 +29,15 @@
 import {sharelink} from '@/api/api'
 import QRCode from "qrcode"
 import { Toast } from 'mint-ui';
+import  top  from '@/components/top'
 export default {
   name: 'Extension',
+  components: {
+    top
+  },
   data() {
     return {
+        top_arr:{left:true,title:'我的二维码',right:{title:'',url:false}},
         QRCodeMsg: "",
         userimg:''
     }

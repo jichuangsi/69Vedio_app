@@ -1,10 +1,6 @@
 <template>
     <div class="wallet">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">我的钱包</div>
-        <div class="right" @click="Rechargerecord">充值明细</div>
-    </div>
+        <top :top_arr="top_arr"></top>
     <div class="balance">
         <div>账户余额（金币）</div>
         <span>0</span>
@@ -49,14 +45,17 @@
 
 <script>
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import  top  from '@/components/top'
 export default {
   name: 'wallet',
   components: {
     swiper,
     swiperSlide,
+    top
   },
   data() {
     return {
+        top_arr:{left:true,title:'我的钱包',right:{title:'充值明细',url:'/Rechargerecord'}},
         tab_check: 0,
         wallet: {
             outHeight: true,
@@ -104,12 +103,6 @@ export default {
   mounted () {
   },
   methods: {
-    back(){
-      window.history.go(-1)
-    },
-    Rechargerecord(){
-       this.$router.push({ path:'/Rechargerecord' })
-    },
     walletcallback(){
         this.tab_check = this.walletswiper.realIndex
     },

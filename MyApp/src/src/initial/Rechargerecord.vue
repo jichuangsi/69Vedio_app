@@ -1,9 +1,6 @@
 <template>
     <div class="Rechargerecord">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">充值明细</div>
-    </div>
+        <top :top_arr="top_arr"></top>
     <div class="center">
                 <div class="li">
                     <div class="left_li">
@@ -20,10 +17,15 @@
 </template>
 
 <script>
+import  top  from '@/components/top'
 export default {
   name: 'Rechargerecord',
+  components: {
+    top
+  },
   data() {
     return {
+        top_arr:{left:true,title:'充值明细',right:{title:'充值明细',url:false}},
     }
   },
   mounted () {

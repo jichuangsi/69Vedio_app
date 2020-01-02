@@ -1,9 +1,6 @@
 <template>
     <div class="ranking">
-    <div class="top">
-        <div class="left" @click="back"></div>
-        <div class="title">{{title}}</div>
-    </div>
+    <top :top_arr="top_arr"></top>
     <div class="center">
         <div class="li" v-for="(item,index) in ranking_arr" :key="index" :class="{one:index == 0,two:index==1,three:index==2,four:index==3,all:index<=2}" @click="personalgo(item.pid)">
             <div class="index" v-if="index <= 2">
@@ -35,17 +32,21 @@
 <script>
 import {inviterank,uploadrand,addconcern,delconcern} from '@/api/api'
 import { Toast } from 'mint-ui';
+import  top  from '@/components/top'
 export default {
   name: 'ranking',
+  components: {
+    top
+  },
   data() {
     return {
-        title:'邀请大神',
+       top_arr:{left:true,title:'人气',right:{title:'开始上传',url:false}},
         ranking_arr:[]
     }
   },
   mounted () {
-      this.title = this.$route.query.title
-      this.getdata(this.title)
+      this.top_arr.title = this.$route.query.title
+      this.getdata(this.top_arr.title)
   },
   methods: {
     getdata(val){

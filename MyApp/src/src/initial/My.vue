@@ -259,6 +259,7 @@ export default {
               }
                 if(res.data.data.videos.length == 0){
                     // Toast('没有更多了...')
+                    this.love_mescrolls.endByPage(0,1)
                 }
                 this.love_mescrolls.endErr()
           })    
@@ -272,6 +273,7 @@ export default {
               }
                 if(res.data.data.videos.length == 0){
                     // Toast('没有更多了...')
+                    this.works_mescrolls.endByPage(0,1)
                 }
                 this.works_mescrolls.endErr()
           })
@@ -285,6 +287,7 @@ export default {
               }
                 if(res.data.data.videos.length == 0){
                     // Toast('没有更多了...')
+                    this.purchase_mescrolls.endByPage(0,1)
                 }
                 this.purchase_mescrolls.endErr()
           })

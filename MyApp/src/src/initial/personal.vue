@@ -69,7 +69,7 @@
                     <div class="wonderful_nav">
                         <div class="wonderful_li" v-for="(item,index) in love_arr" :key="index" @click="singleGo(item)">
                             <div class="wonderful_img">
-                                <img :src="item.thumbnail" alt="">
+                                <img style="width:100%" :src="item.thumbnail" alt="">
                                 <div class="userimg">
                                     <img :src="item.headimgurl" alt="">
                                 </div>
@@ -183,7 +183,7 @@ export default {
         })
     },
     getMylove(){
-          mylike(this.love_index).then(res=>{
+          mylike(this.love_index,this.$route.query.id).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 this.love_arr.push(...res.data.data.videos)
@@ -191,12 +191,13 @@ export default {
               }
                 if(res.data.data.videos.length == 0){
                     Toast('没有更多了...')
+                    this.love_mescrolls.endByPage(0,1)
                 }
                 this.love_mescrolls.endErr()
           })    
     },
     getMyvideo(){
-          myvideos(this.works_index).then(res=>{
+          myvideos(this.works_index,this.$route.query.id).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 this.works_arr.push(...res.data.data.videos)
@@ -204,6 +205,7 @@ export default {
               }
                 if(res.data.data.videos.length == 0){
                     Toast('没有更多了...')
+                    this.works_mescrolls.endByPage(0,1)
                 }
                 this.works_mescrolls.endErr()
           })
@@ -288,7 +290,7 @@ export default {
     padding: 0px 20px;
     position: absolute;
     left: 30px;
-    top: 10px;
+    top: 50px;
 }
 .top .right {
     width: 40px;
@@ -298,7 +300,7 @@ export default {
     background-position: -16px -2068px;
     position: absolute;
     right: 30px;
-    top: 10px;
+    top: 50px;
 }
 .center {
     padding: 0px 30px;
