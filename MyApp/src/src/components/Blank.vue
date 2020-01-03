@@ -2,7 +2,7 @@
   <div class="Blank">
       <div class="box">
           <img src="../assets/images/微信图片_20191210111856.png" alt="" @click="goindex">
-          <div>xxxxxxxxxx</div>
+          <div>69视频</div>
       </div>
   </div>
 </template>

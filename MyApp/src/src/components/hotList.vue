@@ -14,7 +14,7 @@
                 <div class="wonderful_text">
                     {{item.title}}
                 </div>
-        </div>
+            </div>
             </div>
         </ScrollContent>
         </div>

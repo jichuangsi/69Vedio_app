@@ -2,6 +2,7 @@
     <div class="Upload">
     <top :top_arr="top_arr"></top>
     <div class="center">
+        <ScrollContent ref="myscrollfull" :mescrollValue="mescrollValue">
         <div class="video_title">
             <div class="h4">
                 标题
@@ -73,6 +74,7 @@
         <div class="upload_btn" @click="uploadBtn" :class="{btn_o:btnstate}">
             提交
         </div>
+        </ScrollContent>
     </div>
     <div class="bj" v-if="bottom_check">
         <div class="bottom_box" :class="{bottom_check:bottom_check}">
@@ -116,9 +118,11 @@ import {upload,gettags,getclasses} from '@/api/api'
 import { Toast } from 'mint-ui';
 import load from '@/components/loading'
 import  top  from '@/components/top'
+import ScrollContent from '@/components/ScrollContent'
 export default {
   name: 'Upload',
   components: {
+      ScrollContent,
       load,
       top
   },
@@ -130,6 +134,7 @@ export default {
       Agreement_state:true,
       ps_text: "拍摄视频",
       ready:false,
+      mescrollValue: {up: false, down: false},     //页面你是否需要下拉上拉加载
     //   fileimg: require('../assets/images/cd29fe54b110d82bbe16d8400e0383b6.jpg'),
       fileimg:'',
       filevideo:'',
@@ -370,7 +375,7 @@ export default {
         // self.$refs.sp_video.src = mp4Data
         console.log(mp4Data)
         self.bottom_check = false
-        // self.uploadbtn = false
+        self.uploadbtn = false
         console.log(device.platform)
         if(device.platform == 'iOS'){
             window.resolveLocalFileSystemURL( mp4Data, (fileEntry) => {
@@ -493,10 +498,11 @@ export default {
         console.log(path);
         console.log(val.fullPath);
         let self = this
+        let urlpath
         if(device.platform == 'iOS'){
-            let urlpath = path?path:val.localURL
+            urlpath = path?path:val.localURL
         }else{
-            let urlpath = path?path:val.fullPath
+            urlpath = path?path:val.fullPath
         }
         if(val.size < 10485760){
             self.zhuan(urlpath)
@@ -669,46 +675,20 @@ export default {
 
 <style scoped lang="scss">
 .Upload {
-    min-height: calc(100% + 1px)
-}
-.top {
     width: 100%;
-    border-bottom: 1px solid #211a1a;
-    background-color: #100909;
-    position: relative;
-}
-.top .title{
-    text-align: center;
-    font-size: 42px;
-    line-height: 80px;
-    color: #fff;
-    font-weight: 600;
-}
-.top .left {
-    width: 19px;
-    height: 36px;
-    background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
-    background-size: 750px 4532px;
-    background-position: -16px -2147px;
-    padding: 0px 20px;
-    position: absolute;
-    left: 30px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-.top .right {
-    position: absolute;
-    right: 30px;
-    bottom: 20px;
-    font-size: 26px;
-    color: #999999;
-}
-.top img {
-    width: 100%;
-    display: block;
+    height: 100vh;
+    overflow: hidden;
 }
 .center {
+    position: relative;
+}
+.mescroll {
+	position: absolute;
+	top: 0px;
+    left: 0px;
+	height: 100vh; /*如设置bottom:50px,则需height:auto才能生效*/
     padding: 60px 30px;
+    padding-bottom: 80px;
 }
 .center .video_title {
     padding-bottom: 60px;

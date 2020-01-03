@@ -1,6 +1,6 @@
 <template>
     <div class="Video_play">
-        <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
+        <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback" @transitionStart="upgetdata">
           <swiper-slide v-for="(item,index) in video_data" :key="index">
             <!-- <video :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
               <source :src="item.url" type="video/mp4">
@@ -164,7 +164,8 @@ export default {
         gold:'',
         buybtn:true,
         swiper_arr:[],
-        user:''
+        user:'',
+        upstate:true
     }
   },
   watch: {
@@ -256,6 +257,14 @@ export default {
                       sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
                   }
               })
+          }
+      },
+      upgetdata(){
+          if(this.Recommendswiper.realIndex == 0&&this.upstate){
+            this.video_data = []
+            this.pageIndex = 1
+            this.upstate = true
+            this.getdata(0)
           }
       },
     Recommendcallback(){

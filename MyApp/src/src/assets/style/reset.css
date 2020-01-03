@@ -141,37 +141,9 @@ select::-ms-expand { display: none; }
   height: 56px;
 }
 .upwarp-tip {
-  font-size: 36px !important;
+  font-size: 32px !important;
 }
 .mescroll-downwarp .downwarp-progress, .mescroll-upwarp .upwarp-progress {
-  width: 36px !important;
-  height: 36px !important;
+  width: 32px !important;
+  height: 32px !important;
 }
-
-  /* // i4媒体查询 */
-  @media screen and (device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2) {
-        #app {
-          padding-top:30px
-        }
-    }
-    /* // i5媒体查询 */
-    @media screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) {
-      #app {
-          padding-top:60px
-        }
-    }
-    /* // 6sp、7p、8p */
-    @media screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) {
-      #app {
-          padding-top:60px
-        }
-    }
-    /* // x */
-    @media only screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) {
-    }
-    /* // xr */
-    @media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
-    }
-    /* // xs max */
-    @media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
-    }

@@ -2,7 +2,7 @@
     <div class="Popularity">
         <top :top_arr="top_arr"></top>
         <div class="center">
-        <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+        <ScrollContent ref="myscrollfull" @load="loadDatas" @reload="reloadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
             <div class="activity">
                 <img src="../assets/images/微信图片_20191212151058.png" alt="">
             </div>
@@ -113,6 +113,8 @@ import  foot  from '@/components/Foot'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
 import  top  from '@/components/top'
+import {mapGetters} from 'vuex'
+import store from '@/store';
 export default {
   name: 'Popularity',
   components: {
@@ -129,8 +131,16 @@ export default {
         inviteimg:'',
         uploadimg:'',
         page:1,
-        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        mescrollValue: {up: true, down: true},     //页面你是否需要下拉上拉加载
     }
+  },
+  computed: {
+    //vuex 调用
+    ...mapGetters([
+      'homeVideosList',
+      'homeVideosPage',
+      'Popularity'
+    ])
   },
   mounted () {
       this.getdata()
@@ -138,28 +148,42 @@ export default {
   },
   methods: {
     getdata(){
-        popularrank().then(res=>{
-            console.log(res)
-            if(res.data.resultCode == 0){
-                this.popularrank_arr = res.data.data.good
-                this.inviteimg = res.data.data.invite[0].headimgurl
-                this.uploadimg = res.data.data.upload[0].headimgurl
-            }
-        })
+        if(this.Popularity.good){
+            this.popularrank_arr = this.Popularity.good
+            this.inviteimg = this.Popularity.invite[0].headimgurl
+            this.uploadimg = this.Popularity.upload[0].headimgurl
+        }else{
+            popularrank().then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 0){
+                    store.commit('SET_POPULARITY', res.data.data);
+                    this.popularrank_arr = res.data.data.good
+                    this.inviteimg = res.data.data.invite[0].headimgurl
+                    this.uploadimg = res.data.data.upload[0].headimgurl
+                }
+            })
+        }
     },
     getvideo(){
-        homevideo(this.page).then(res=>{
-            console.log(res)
-            if(res.data.resultCode == 0&&res.data.data.videos.length!=0){
-                this.wonderful.push(...res.data.data.videos)
-                this.page = this.page+1
-            }
-            if(res.data.data.videos.length == 0){
-                Toast('没有更多了...')
-                this.mescrolls.endByPage(0,1)
-            }
-            this.mescrolls.endErr()
-        })
+        if(this.page==1&&this.homeVideosList&&this.homeVideosList.length>0){
+              this.page = this.homeVideosPage+1;
+              this.wonderful.push(...this.homeVideosList)
+        }else{
+            homevideo(this.page).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 0&&res.data.data.videos.length!=0){
+                  store.commit('SET_HOME_VIDEOS_PAGE', this.page);
+                  store.commit('SET_HOME_VIDEOS_LIST', res.data.data.videos);
+                    this.wonderful.push(...res.data.data.videos)
+                    this.page = this.page+1
+                }
+                if(res.data.data.videos.length == 0){
+                    Toast('没有更多了...')
+                    this.mescrolls.endByPage(0,1)
+                }
+                this.mescrolls.endErr()
+            })
+        }
     },
     singleGo(val) {
         let num = sessionStorage.getItem('frequency')?Number(sessionStorage.getItem('frequency'))+1:1
@@ -188,8 +212,18 @@ export default {
     mescrollsInit (mescrolls) {
         this.mescrolls = mescrolls;
     },
+    reloadDatas(){
+        this.page = 1;
+        this.wonderful = [];
+        store.commit('SET_HOME_VIDEOS_PAGE', this.page);
+        store.commit('RESET__HOME_VIDEOS_LIST', this.wonderful);
+        let data = {}
+        store.commit('SET_POPULARITY', data);
+        this.getdata()
+        this.getvideo()
+    },
     loadDatas(){
-          this.getvideo()
+        this.getvideo()
     }
   }
 }

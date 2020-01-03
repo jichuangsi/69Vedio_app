@@ -12,6 +12,13 @@ const getters = {
   commentVideosList: state => state.latestVideos.commentVideosList,
   likeVideosPage: state => state.latestVideos.likeVideosPage,
   likeVideosList: state => state.latestVideos.likeVideosList,
+  myVideosPage: state => state.latestVideos.myVideosPage,
+  myVideosList: state => state.latestVideos.myVideosList,
+  mylikeVideosPage: state => state.latestVideos.mylikeVideosPage,
+  mylikeVideosList: state => state.latestVideos.mylikeVideosList,
+  buyVideosPage: state => state.latestVideos.buyVideosPage,
+  buyVideosList: state => state.latestVideos.buyVideosList,
+  Popularity: state => state.latestVideos.Popularity,
 }
 
 export default getters;

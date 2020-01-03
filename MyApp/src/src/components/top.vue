@@ -117,5 +117,16 @@ export default {
        padding-top: 40px
    } 
 }
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
+   .top {
+       padding-top: 40px
+   } 
+}
+//  xs max
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
+    .top {
+       padding-top: 40px
+   } 
+}
 
 </style>

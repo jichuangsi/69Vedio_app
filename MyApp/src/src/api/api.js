@@ -209,7 +209,7 @@ export function playmostvideos(page) {
 export function commentmostvideos(page) {
   return axios({
     method: 'POST',
-    url: `Videoservice/commentmostvideos`,
+    url: `/Videoservice/commentmostvideos`,
     data:{
       page
     }

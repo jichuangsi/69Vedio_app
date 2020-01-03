@@ -157,6 +157,8 @@ import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import  foot  from '@/components/Foot'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
+import {mapGetters} from 'vuex'
+import store from '@/store';
 export default {
   name: 'My',
   components: {
@@ -203,7 +205,16 @@ export default {
   computed: {
     tab_myswiper() {
       return this.$refs.tab_my.swiper
-    }
+    },
+    //vuex 调用
+    ...mapGetters([
+      'myVideosList',
+      'myVideosPage',
+      'mylikeVideosList',
+      'mylikeVideosPage',
+      'buyVideosList',
+      'buyVideosPage',
+    ])
   },
   mounted () {
       this.getdata()
@@ -251,9 +262,15 @@ export default {
           this.getMybuy()
       },
     getMylove(){
+        if(this.love_index==1&&this.mylikeVideosList&&this.mylikeVideosList.length>0){
+              this.love_index = this.mylikeVideosPage+1;
+              this.love_arr.push(...this.mylikeVideosList)
+        }else{
           mylike(this.love_index).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                store.commit('SET_MYLIKE_VIDEOS_PAGE', this.works_index);
+                store.commit('SET_MYLIKE_VIDEOS_LIST', res.data.data.videos);
                 this.love_arr.push(...res.data.data.videos)
                 this.love_index = this.love_index+1
               }
@@ -262,12 +279,19 @@ export default {
                     this.love_mescrolls.endByPage(0,1)
                 }
                 this.love_mescrolls.endErr()
-          })    
+          }) 
+        }  
     },
     getMyvideo(){
+        if(this.works_index==1&&this.myVideosList&&this.myVideosList.length>0){
+              this.works_index = this.myVideosPage+1;
+              this.works_arr.push(...this.myVideosList)
+        }else{
           myvideos(this.works_index).then(res=>{
               console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                store.commit('SET_MY_VIDEOS_PAGE', this.works_index);
+                store.commit('SET_MY_VIDEOS_LIST', res.data.data.videos);
                 this.works_arr.push(...res.data.data.videos)
                 this.works_index = this.works_index+1
               }
@@ -277,20 +301,28 @@ export default {
                 }
                 this.works_mescrolls.endErr()
           })
+        }
     },
     getMybuy(){
-        mybuyvideos(this.purchase_index).then(res=>{
-              console.log(res)
-              if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
-                this.purchase_arr.push(...res.data.data.videos)
-                this.purchase_index = this.purchase_index+1
-              }
-                if(res.data.data.videos.length == 0){
-                    // Toast('没有更多了...')
-                    this.purchase_mescrolls.endByPage(0,1)
+        if(this.purchase_index==1&&this.buyVideosList&&this.buyVideosList.length>0){
+              this.purchase_index = this.buyVideosPage+1;
+              this.purchase_arr.push(...this.buyVideosList)
+        }else{
+            mybuyvideos(this.purchase_index).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
+                    store.commit('SET_BUY_VIDEOS_PAGE', this.works_index);
+                    store.commit('SET_BUY_VIDEOS_LIST', res.data.data.videos);
+                    this.purchase_arr.push(...res.data.data.videos)
+                    this.purchase_index = this.purchase_index+1
                 }
-                this.purchase_mescrolls.endErr()
-          })
+                    if(res.data.data.videos.length == 0){
+                        // Toast('没有更多了...')
+                        this.purchase_mescrolls.endByPage(0,1)
+                    }
+                    this.purchase_mescrolls.endErr()
+            })
+        }
     },
     tab_mycallback(){
         this.tab_check = this.tab_myswiper.realIndex
@@ -320,6 +352,21 @@ export default {
         this.my_mescrolls = mescrolls;
     },
     my_reloadDatas(){
+        this.works_index = 1;
+        this.works_arr = [];
+        store.commit('SET_MY_VIDEOS_PAGE', this.works_index);
+        store.commit('RESET__MY_VIDEOS_LIST', this.works_arr);
+        this.love_index = 1;
+        this.love_arr = [];
+        store.commit('SET_MYLIKE_VIDEOS_PAGE', this.love_index);
+        store.commit('RESET__MYLIKE_VIDEOS_LIST', this.love_arr);
+        this.purchase_index = 1;
+        this.purchase_arr = [];
+        store.commit('SET_BUY_VIDEOS_PAGE', this.purchase_index);
+        store.commit('RESET__BUY_VIDEOS_LIST', this.purchase_arr);
+        this.getMylove()
+        this.getMyvideo()
+        this.getMybuy()
         this.my_mescrolls.endErr()
     },
     works_mescrollsInit (mescrolls) {
@@ -626,8 +673,8 @@ export default {
 .mescroll {
     position: absolute;
     left: 0px;
-	bottom:80px;
-	height: 650px; /*如设置bottom:50px,则需height:auto才能生效*/
+	bottom:50px;
+	height: 700px; /*如设置bottom:50px,则需height:auto才能生效*/
 }
 .my_scroll {
     height: 100%;

@@ -390,7 +390,7 @@ export default {
     padding: 0px 20px;
     position: absolute;
     left: 30px;
-    top: 50%;
+    bottom: 0%;
     transform: translateY(-50%);
 }
 .top .right {
@@ -686,5 +686,64 @@ export default {
 }
 .message_box .btn div:first-child {
     border-right: 1px solid #666;
+}
+  /* iphone 3 */
+@media only screen and (min-device-width: 320px) and (max-device-height: 480px) and (-webkit-device-pixel-ratio: 1) { 
+   .top {
+       margin-top: 30px
+   } 
+}
+
+/* iphone 4 */
+@media only screen and (min-device-width: 320px) and (max-device-height: 480px) and (-webkit-device-pixel-ratio: 2) {
+    .top {
+       margin-top: 30px
+   } 
+ }
+
+/* iphone 5 */
+@media only screen and (min-device-width: 320px) and (max-device-height: 568px) and (-webkit-device-pixel-ratio: 2) {
+    .top {
+       margin-top: 30px
+   } 
+ }
+
+/* iphone 6, 6s */
+@media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-device-pixel-ratio: 2) { 
+    .top {
+       margin-top: 30px
+   } 
+}
+
+/* iphone 7, 8 */
+@media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-device-pixel-ratio: 2) { 
+    .top {
+       margin-top: 30px
+   } 
+}
+
+/* iphone 6+, 6s+, 7+, 8+ */
+@media only screen and (min-device-width: 414px) and (max-device-height: 736px) and (-webkit-device-pixel-ratio: 3) { 
+    .top {
+       margin-top: 30px
+   } 
+}
+
+/* iphone X */
+@media only screen and (min-device-width: 375px) and (max-device-height: 812px) and (-webkit-device-pixel-ratio: 3) { 
+    .top {
+       margin-top: 40px
+   } 
+}
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
+   .top {
+       margin-top: 40px
+   } 
+}
+//  xs max
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
+    .top {
+       margin-top: 40px
+   } 
 }
 </style>

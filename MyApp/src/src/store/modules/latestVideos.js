@@ -14,6 +14,13 @@ const latestVideos = {
     commentVideosList: [],
     likeVideosPage: 1,
     likeVideosList: [],
+    myVideosPage: 1,
+    myVideosList: [],
+    mylikeVideosPage: 1,
+    mylikeVideosList: [],
+    buyVideosPage: 1,
+    buyVideosList: [],
+    Popularity:{}
   },
   mutations: {
     //官方
@@ -99,6 +106,52 @@ const latestVideos = {
     },
     SET_LIKE_VIDEOS_PAGE: (state, likePage) =>{
       state.likeVideosPage = likePage;
+    },
+    //我的上传
+    SET_MY_VIDEOS_LIST: (state, myData) => {
+      if(state.myVideosList.length == 0){
+        state.myVideosList = myData;
+      }else{
+        state.myVideosList = state.myVideosList.concat(myData);
+      }
+    },
+    RESET__MY_VIDEOS_LIST: (state, newData) => {
+      state.myVideosList = newData;
+    },
+    SET_MY_VIDEOS_PAGE: (state, myPage) =>{
+      state.myVideosPage = myPage;
+    },
+    //我的喜欢
+    SET_MYLIKE_VIDEOS_LIST: (state, mylikeData) => {
+      if(state.mylikeVideosList.length == 0){
+        state.mylikeVideosList = mylikeData;
+      }else{
+        state.mylikeVideosList = state.mylikeVideosList.concat(mylikeData);
+      }
+    },
+    RESET__MYLIKE_VIDEOS_LIST: (state, newData) => {
+      state.mylikeVideosList = newData;
+    },
+    SET_MYLIKE_VIDEOS_PAGE: (state, mylikePage) =>{
+      state.mylikeVideosPage = mylikePage;
+    },
+    //我的购买
+    SET_BUY_VIDEOS_LIST: (state, buyData) => {
+      if(state.buyVideosList.length == 0){
+        state.buyVideosList = buyData;
+      }else{
+        state.buyVideosList = state.buyVideosList.concat(buyData);
+      }
+    },
+    RESET__BUY_VIDEOS_LIST: (state, newData) => {
+      state.buyVideosList = newData;
+    },
+    SET_BUY_VIDEOS_PAGE: (state, buyPage) =>{
+      state.buyVideosPage = buyPage;
+    },
+    //人气Popularity
+    SET_POPULARITY :(state, newData) =>{
+      state.Popularity = newData;
     }
   },
   actions: {

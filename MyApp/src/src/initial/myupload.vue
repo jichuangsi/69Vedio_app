@@ -2,7 +2,7 @@
     <div class="myupload">
     <top :top_arr="top_arr"></top>
     <div class="center">
-        <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+        <ScrollContent ref="myscrollfull" @load="loadDatas" @reload="reloadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
         <div class="wonderful_nav">
             <div class="wonderful_li" v-for="(item,index) in purchase_arr" :key="index" @click="singleGo(item)">
                 <div class="wonderful_img">
@@ -26,6 +26,8 @@ import {myvideos} from '@/api/api'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
 import  top  from '@/components/top'
+import {mapGetters} from 'vuex'
+import store from '@/store';
 export default {
   name: 'myupload',
   components: {
@@ -36,29 +38,43 @@ export default {
     return {
        top_arr:{left:true,title:'我的上传',right:{title:'开始上传',url:'/myupload'}},
         purchase_arr:[],
-        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        mescrollValue: {up: true, down: true},     //页面你是否需要下拉上拉加载
         page:1
     }
   },
+  computed: {
+    //vuex 调用
+    ...mapGetters([
+      'myVideosList',
+      'myVideosPage',
+    ])
+  },
   mounted () {
       this.getdata()
+      console.log(this.myVideosList)
   },
   methods: {
     getdata(){
-        myvideos(this.page).then(res=>{
-            console.log(res)
-            if(res.data.resultCode == 0&&res.data.data.videos.length !=0){
-                this.purchase_arr.push(...res.data.data.videos)
-                this.page = this.page+1
-            }
-            if(res.data.data.videos.length == 0){
-                Toast('没有更多了...')
-                this.mescrolls.endByPage(0,1)
-            }
-            this.mescrolls.endErr()
-        }).catch(err=>{
-            console.log(err)
-        })
+        if(this.page==1&&this.myVideosList&&this.myVideosList.length>0){
+              this.page = this.myVideosPage+1;
+              this.purchase_arr.push(...this.myVideosList)
+        }else{
+            myvideos(this.page).then(res=>{
+                if(res.data.resultCode == 0&&res.data.data.videos.length !=0){
+                  store.commit('SET_MY_VIDEOS_PAGE', this.page);
+                  store.commit('SET_MY_VIDEOS_LIST', res.data.data.videos);
+                    this.purchase_arr.push(...res.data.data.videos)
+                    this.page = this.page+1
+                }
+                if(res.data.data.videos.length == 0){
+                    Toast('没有更多了...')
+                    this.mescrolls.endByPage(0,1)
+                }
+                this.mescrolls.endErr()
+            }).catch(err=>{
+                console.log(err)
+            })
+        }
     },
     back(){
       window.history.go(-1)
@@ -77,8 +93,15 @@ export default {
     mescrollsInit (mescrolls) {
         this.mescrolls = mescrolls;
     },
+    reloadDatas(){
+        this.page = 1;
+        this.purchase_arr = [];
+        store.commit('SET_MY_VIDEOS_PAGE', this.page);
+        store.commit('RESET__MY_VIDEOS_LIST', this.purchase_arr);
+        this.getdata()
+    },
     loadDatas(){
-          this.getdata()
+        this.getdata()
     }
   }
 }

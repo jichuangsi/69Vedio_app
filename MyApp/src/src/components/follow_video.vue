@@ -1,6 +1,6 @@
 <template>
     <div class="follow_video">
-        <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback">
+        <swiper :options="Recommend" ref="Recommend" @slideChangeTransitionEnd="Recommendcallback" @transitionStart="upgetdata">
           <swiper-slide v-for="(item,index) in video_data" :key="index">
             <!-- <video class="video_f" loop :poster="item.thumbnail" webkit-playsinline playsinline x5-playsinline>
               <source :src="item.url" type="video/mp4">
@@ -164,7 +164,8 @@ export default {
         gold:'',
         buybtn:true,
         swiper_arr:[],
-        user:''
+        user:'',
+        upstate:true
     }
   },
   watch: {
@@ -212,6 +213,14 @@ export default {
     self.user = JSON.parse(sessionStorage.getItem('usermessage'))
   },
   methods: {
+      upgetdata(){
+          if(this.Recommendswiper.realIndex == 0&&this.upstate){
+            this.video_data = []
+            this.pageIndex = 1
+            this.upstate = true
+            this.getdata(0)
+          }
+      },
       getdata(index){
           let self = this
         concernvideos(self.pageIndex).then(res=>{
@@ -257,7 +266,7 @@ export default {
                       this.video_data[index].good = this.video_data[index].good - 1
                       sessionStorage.setItem('follow_video',JSON.stringify(this.video_data))
                   }
-              })
+              })    
           }
       },
     Recommendcallback(){
@@ -265,6 +274,7 @@ export default {
             if(this.Recommendswiper.realIndex == i){
                 this.gold = this.video_data[i].gold
                 this.id = this.video_data[i].id
+                this.upstate = this.Recommendswiper.realIndex == 0?true:false
                 tryandsee(this.id).then(res=>{
                     if(res.data.resultCode == 0||res.data.resultCode == 9021){
                         this.video_arr[i].play()
