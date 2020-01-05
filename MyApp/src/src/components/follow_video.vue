@@ -436,7 +436,7 @@ export default {
     background-color: #100909;
 }
 .right_nav {
-    position: fixed;
+    position: absolute;
     right: 27px;
     bottom: 228px;
 }
@@ -507,7 +507,7 @@ export default {
     line-height: 46px;
     width: 60%;
     color: #fff;
-    position: fixed;
+    position: absolute;
     left: 30px;
     bottom: 126px;
 }

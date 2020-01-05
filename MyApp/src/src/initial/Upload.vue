@@ -378,9 +378,9 @@ export default {
         self.uploadbtn = false
         console.log(device.platform)
         if(device.platform == 'iOS'){
-            window.resolveLocalFileSystemURL( mp4Data, (fileEntry) => {
+            window.resolveLocalFileSystemURL( 'file://'+ mp4Data, (fileEntry) => {
                 fileEntry.file(function (file) {
-                  self.edit(file,mp4Data)
+                  self.edit(file,'file://'+ mp4Data)
                 });
               }, (err)=>{
                 console.log(6666)
@@ -504,11 +504,16 @@ export default {
         }else{
             urlpath = path?path:val.fullPath
         }
+        console.log(urlpath)
         if(val.size < 10485760){
             self.zhuan(urlpath)
             self.filevideo = urlpath
-            self.$refs.sp_video.src = urlpath
             self.uploadbtn = true
+            if(device.platform == 'iOS'){
+                self.$refs.sp_video.src = path?path:val.fullPath
+            }else{
+                self.$refs.sp_video.src = urlpath
+            }
         }else{
 
           console.log(urlpath);

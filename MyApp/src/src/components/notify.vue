@@ -1,9 +1,6 @@
 <template>
     <div class="notify">
-        <div class="top">
-            <div class="left" @click="back"></div>
-            <div class="title">系统通知</div>
-        </div>
+        <top :top_arr="top_arr"></top>
         <div class="center">
             <div class="li" v-for="(item,index) in notify_arr" :key="index">
                 <div class="img">
@@ -27,10 +24,15 @@
 
 <script>
 import {getnotice} from '@/api/api'
+import  top  from '@/components/top'
 export default {
   name: 'notify',
+  components: {
+    top
+    },
   data() {
     return {
+        top_arr:{left:true,title:'系统通知',right:{title:'开始上传',url:false}},
         notify_arr: "",
     }
   },

@@ -448,7 +448,7 @@ export default {
     position: absolute;
     left: 0px;
     // padding: 0px 20px;
-    height: 100vh; /*如设置bottom:50px,则需height:auto才能生效*/
+    height: 90vh; /*如设置bottom:50px,则需height:auto才能生效*/
     padding: 175px 30px;
     padding-top: 0px;
 }

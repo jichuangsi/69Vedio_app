@@ -260,6 +260,7 @@ export default {
           this.getMylove()
           this.getMyvideo()
           this.getMybuy()
+            this.my_mescrolls.endErr()
       },
     getMylove(){
         if(this.love_index==1&&this.mylikeVideosList&&this.mylikeVideosList.length>0){
@@ -364,10 +365,8 @@ export default {
         this.purchase_arr = [];
         store.commit('SET_BUY_VIDEOS_PAGE', this.purchase_index);
         store.commit('RESET__BUY_VIDEOS_LIST', this.purchase_arr);
-        this.getMylove()
-        this.getMyvideo()
-        this.getMybuy()
-        this.my_mescrolls.endErr()
+        sessionStorage.removeItem('user')
+        this.getdata()
     },
     works_mescrollsInit (mescrolls) {
         this.works_mescrolls = mescrolls;

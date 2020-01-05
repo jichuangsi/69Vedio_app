@@ -272,6 +272,7 @@ export default {
             if(this.Recommendswiper.realIndex == i){
                 this.gold = this.video_data[i].gold
                 this.id = this.video_data[i].id
+                this.upstate = this.Recommendswiper.realIndex == 0?true:false
                 tryandsee(this.id).then(res=>{
                     if(res.data.resultCode == 0||res.data.resultCode == 9021){
                         this.video_arr[i].play()

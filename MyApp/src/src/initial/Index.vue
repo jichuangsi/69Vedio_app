@@ -389,9 +389,10 @@ export default {
     background: url('../assets/images/微信图片_20191206173627.png') no-repeat;
     background-size: 750px 4532px;
     background-position: -16px -870px;
+    margin: 10px;
     position: absolute;
     left: 46px;
-    top: 30px;
+    bottom: -10px;
 }
 .top .title {
     display: flex;
@@ -429,60 +430,60 @@ export default {
   /* iphone 3 */
 @media only screen and (min-device-width: 320px) and (max-device-height: 480px) and (-webkit-device-pixel-ratio: 1) { 
    .top {
-       top: 10px
+       top: 30px
    } 
 }
 
 /* iphone 4 */
 @media only screen and (min-device-width: 320px) and (max-device-height: 480px) and (-webkit-device-pixel-ratio: 2) {
     .top {
-       top: 10px
+       top: 30px
    } 
  }
 
 /* iphone 5 */
 @media only screen and (min-device-width: 320px) and (max-device-height: 568px) and (-webkit-device-pixel-ratio: 2) {
     .top {
-       top: 10px
+       top: 30px
    } 
  }
 
 /* iphone 6, 6s */
 @media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-device-pixel-ratio: 2) { 
     .top {
-       top: 10px
+       top: 30px
    } 
 }
 
 /* iphone 7, 8 */
 @media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-device-pixel-ratio: 2) { 
     .top {
-       top: 10px
+       top: 30px
    } 
 }
 
 /* iphone 6+, 6s+, 7+, 8+ */
 @media only screen and (min-device-width: 414px) and (max-device-height: 736px) and (-webkit-device-pixel-ratio: 3) { 
     .top {
-       top: 10px
+       top: 30px
    } 
 }
 
 /* iphone X */
 @media only screen and (min-device-width: 375px) and (max-device-height: 812px) and (-webkit-device-pixel-ratio: 3) { 
     .top {
-       top: 30px
+       top: 50px
    } 
 }
 @media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
    .top {
-       top: 30px
+       top: 50px
    } 
 }
 /* // xs max */
 @media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
     .top {
-       top: 30px
+       top: 50px
    } 
 }
 </style>

@@ -288,9 +288,10 @@ export default {
     background-size: 750px 4532px;
     background-position: -16px -2147px;
     padding: 0px 20px;
+    margin: 20px;
     position: absolute;
-    left: 30px;
-    top: 50px;
+    left: 20px;
+    top: 30px;
 }
 .top .right {
     width: 40px;
