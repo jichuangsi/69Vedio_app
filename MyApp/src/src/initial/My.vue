@@ -10,7 +10,11 @@
                 <img :src="fileimg" alt="">
             </div>
             <div class="user_box">
-                <div class="username">{{nickname}}</div>
+                <div class="username">
+                    {{nickname}}
+                    <span v-if="vipstate == 0">(普通用户)</span>
+                    <span class="vipuser" v-if="vipstate == 1">(VIP用户)</span>
+                </div>
                 <div class="usersex">账户：{{username}}</div>
                 <div class="usertext">{{region}} {{year}}岁</div>
             </div>
@@ -59,8 +63,10 @@
                 </router-link>
             </div>
             <div>
-                <div class="vipcz"></div>
-                <span>VIP充值</span>
+                <router-link to="VIP">
+                    <div class="vipcz"></div>
+                    <span>VIP充值</span>
+                </router-link>
             </div>
             <div>
                 <router-link to="Extension">
@@ -197,7 +203,8 @@ export default {
         follownum:'',
         money:'',
         fabulous:'',
-        see:''
+        see:'',
+        vipstate:0
     }
   },
   watch: {
@@ -238,6 +245,7 @@ export default {
                 this.money = res.data.data.money
                 this.fabulous = res.data.data.fabulous
                 this.see = res.data.data.try_and_see
+                this.vipstate = res.data.data.isvip
                 sessionStorage.setItem('user',JSON.stringify(res.data.data))
               }
           })
@@ -256,6 +264,7 @@ export default {
                 this.money = user.money
                 this.fabulous = user.fabulous
                 this.see = user.try_and_see
+                this.vipstate = user.isvip
           }
           this.getMylove()
           this.getMyvideo()
@@ -268,7 +277,7 @@ export default {
               this.love_arr.push(...this.mylikeVideosList)
         }else{
           mylike(this.love_index).then(res=>{
-              console.log(res)
+            //   console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 store.commit('SET_MYLIKE_VIDEOS_PAGE', this.works_index);
                 store.commit('SET_MYLIKE_VIDEOS_LIST', res.data.data.videos);
@@ -289,7 +298,7 @@ export default {
               this.works_arr.push(...this.myVideosList)
         }else{
           myvideos(this.works_index).then(res=>{
-              console.log(res)
+            //   console.log(res)
               if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                 store.commit('SET_MY_VIDEOS_PAGE', this.works_index);
                 store.commit('SET_MY_VIDEOS_LIST', res.data.data.videos);
@@ -310,7 +319,7 @@ export default {
               this.purchase_arr.push(...this.buyVideosList)
         }else{
             mybuyvideos(this.purchase_index).then(res=>{
-                console.log(res)
+                // console.log(res)
                 if(res.data.resultCode == 0&&res.data.data.videos.length != 0){
                     store.commit('SET_BUY_VIDEOS_PAGE', this.works_index);
                     store.commit('SET_BUY_VIDEOS_LIST', res.data.data.videos);
@@ -444,6 +453,9 @@ export default {
 .center .user .user_box div{
     margin-bottom: 10px;
     line-height: 36px;
+}
+.center .user .user_box .vipuser {
+    color: #ff3841;
 }
 .center .user .user_btn {
     width: 130px;

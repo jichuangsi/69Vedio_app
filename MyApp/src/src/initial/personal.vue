@@ -13,7 +13,11 @@
             <div class="userimg">
                 <img :src="fileimg" alt="">
                 <div class="user_box">
-                    <div class="username">{{nickname}}</div>
+                    <div class="username">
+                        {{nickname}}
+                        <span v-if="vipstate == 0">(普通用户)</span>
+                        <span class="vipuser" v-if="vipstate == 1">(VIP用户)</span>
+                    </div>
                     <div class="usersex">账户：{{username}}</div>
                     <div class="usertext">{{region}} {{year}}岁</div>
                 </div>
@@ -88,7 +92,7 @@
 </template>
 
 <script>
-import {mylike,myvideos,getmemberinfo,addconcern,delconcern} from '@/api/api'
+import {getgoldrecord} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import ScrollContent from '@/components/ScrollContent'
 import { Toast } from 'mint-ui';
@@ -130,7 +134,8 @@ export default {
         follownum:'',
         money:'',
         fabulous:'',
-        concerned:''
+        concerned:'',
+        vipstate:0
     }
   },
   computed: {
@@ -159,6 +164,7 @@ export default {
                 this.money = res.data.data.money
                 this.fabulous = res.data.data.fabulous
                 this.concerned = res.data.data.concerned
+                this.vipstate = res.data.data.isvip
               }
           })
           this.getMylove()
@@ -336,6 +342,9 @@ export default {
 .center .user .user_box div{
     margin-bottom: 10px;
     line-height: 36px;
+}
+.center .user .user_box .vipuser {
+    color: #ff3841;
 }
 .center .user .follow_btn {
     width: 130px;

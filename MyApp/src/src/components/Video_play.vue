@@ -291,6 +291,7 @@ export default {
       }
     },
     personalgo(id){
+        console.log(1111)
         if(id != 0&&id != this.user.userid){
             this.$router.push({
              path:'/personal',

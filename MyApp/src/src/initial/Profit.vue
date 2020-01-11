@@ -11,27 +11,30 @@
     </div>
     <div class="sx">
         <div>筛选</div>
-        <select name="" id="">
-            <option value="">全部明细</option>
-            <option value="">收入</option>
-            <option value="">支出</option>
+        <select name="" id="" v-model="selected">>
+            <option value="0">全部明细</option>
+            <option value="2">收入</option>
+            <option value="1">支出</option>
         </select>
     </div>
     <div class="center">
         <swiper :options="Profit" ref="Profit" @slideChangeTransitionEnd="Profitcallback">
             <swiper-slide>
-                <div class="li">
+                <ScrollContent ref="myscrollfull" @load="Budget_loadDatas" :mescrollValue="Budget_mescrollValue" @init="Budget_mescrollsInit">
+                <div class="li" v-for="(item,index) in Budget_arr" v-if="selected == 0||selected == 1&&item.gold<0||selected == 2&&item.gold>0" :key="index">
                     <div class="left_li">
-                        <div>提现100金币</div>
-                        <span>2019/09/09 12:00:00</span>
+                        <div>{{item.explain}}{{item.gold}}金币</div>
+                        <span>{{item.add_time}}</span>
                     </div>
                     <div class="right_li">
-                        已放入钱包
+                        {{item.gold}}
                     </div>
                 </div>
+                </ScrollContent>
             </swiper-slide>
             <swiper-slide>
-                <div class="li">
+                <ScrollContent ref="myscrollfull" @load="works_loadDatas" :mescrollValue="works_mescrollValue" @init="works_mescrollsInit">
+                <div class="li" v-for="(item,index) in works_arr" :key="index">
                     <img src="../assets/images/心.png" alt="">
                     <div class="left_li">
                         <div>mic 赠送100金币</div>
@@ -41,6 +44,7 @@
                         +10
                     </div>
                 </div>
+                </ScrollContent>
             </swiper-slide>
         </swiper>
     </div>
@@ -48,12 +52,16 @@
 </template>
 
 <script>
+import {getgoldrecord} from '@/api/api'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import ScrollContent from '@/components/ScrollContent'
+import { Toast } from 'mint-ui';
 export default {
   name: 'Profit',
   components: {
     swiper,
     swiperSlide,
+    ScrollContent
   },
   data() {
     return {
@@ -61,7 +69,14 @@ export default {
         Profit: {
             outHeight: true,
             observer: true,
-        }
+        },
+        Budget_arr:[],
+        works_arr:[],
+        Budget_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        works_mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        works_index:1,
+        Budget_index:1,
+        selected:0
     }
   },
   computed: {
@@ -70,6 +85,8 @@ export default {
     }
   },
   mounted () {
+      this.getBudget()
+      this.getworks()
   },
   methods: {
     back(){
@@ -81,12 +98,58 @@ export default {
     tabclick(index){
         this.tab_check = index
         this.Profitswiper.slideTo(index)
-    }
+    },
+    getBudget(){
+          getgoldrecord(0,this.Budget_index).then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.recordlist.length != 0){
+                this.Budget_arr.push(...res.data.data.recordlist)
+                this.Budget_index = this.Budget_index+1
+              }
+                if(res.data.data.recordlist.length == 0){
+                    Toast('没有更多了...')
+                    this.Budget_mescrolls.endByPage(0,1)
+                }
+                this.Budget_mescrolls.endErr()
+          })    
+    },
+    getworks(){
+          getgoldrecord(0,this.works_index,'video').then(res=>{
+              console.log(res)
+              if(res.data.resultCode == 0&&res.data.data.recordlist.length != 0){
+                this.works_arr.push(...res.data.data.recordlist)
+                this.works_index = this.works_index+1
+              }
+                if(res.data.data.recordlist.length == 0){
+                    Toast('没有更多了...')
+                    this.works_mescrolls.endByPage(0,1)
+                }
+                this.works_mescrolls.endErr()
+          })
+    },
+    
+    works_mescrollsInit (mescrolls) {
+        this.works_mescrolls = mescrolls;
+    },
+    works_loadDatas(){
+        this.getworks()
+    },
+    Budget_mescrollsInit (mescrolls) {
+        this.Budget_mescrolls = mescrolls;
+    },
+    Budget_loadDatas(){
+        this.getBudget()
+    },
   }
 }
 </script>
 
 <style scoped lang="scss">
+.Profit {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
 .top {
     width: 100%;
     border-bottom: 1px solid #211a1a;
@@ -109,7 +172,7 @@ export default {
     padding: 0px 20px;
     position: absolute;
     left: 30px;
-    top: 50%;
+    bottom: 0%;
     transform: translateY(-50%);
 }
 .top .right {
@@ -146,6 +209,11 @@ export default {
     left: 50%;
     bottom: -0px;
     transform: translateX(-50%);
+}
+.swiper-slide {
+    height: 90vh;
+    width: 100% !important;
+    position: relative;
 }
 .sx {
     width: 100%;
@@ -207,5 +275,71 @@ export default {
             font-size: 26px;
         }
     }
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	top:0px;
+	height: 90vh; /*如设置bottom:50px,则需height:auto才能生效*/
+    padding-bottom: 200px;
+}
+  /* iphone 3 */
+@media only screen and (min-device-width: 320px) and (max-device-height: 480px) and (-webkit-device-pixel-ratio: 1) { 
+   .top {
+       padding-top: 30px
+   } 
+}
+
+/* iphone 4 */
+@media only screen and (min-device-width: 320px) and (max-device-height: 480px) and (-webkit-device-pixel-ratio: 2) {
+    .top {
+       padding-top: 30px
+   } 
+ }
+
+/* iphone 5 */
+@media only screen and (min-device-width: 320px) and (max-device-height: 568px) and (-webkit-device-pixel-ratio: 2) {
+    .top {
+       padding-top: 30px
+   } 
+ }
+
+/* iphone 6, 6s */
+@media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-device-pixel-ratio: 2) { 
+    .top {
+       padding-top: 30px
+   } 
+}
+
+/* iphone 7, 8 */
+@media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-device-pixel-ratio: 2) { 
+    .top {
+       padding-top: 30px
+   } 
+}
+
+/* iphone 6+, 6s+, 7+, 8+ */
+@media only screen and (min-device-width: 414px) and (max-device-height: 736px) and (-webkit-device-pixel-ratio: 3) { 
+    .top {
+       padding-top: 30px
+   } 
+}
+
+/* iphone X */
+@media only screen and (min-device-width: 375px) and (max-device-height: 812px) and (-webkit-device-pixel-ratio: 3) { 
+    .top {
+       padding-top: 40px
+   } 
+}
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
+   .top {
+       padding-top: 40px
+   } 
+}
+//  xs max
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
+    .top {
+       padding-top: 40px
+   } 
 }
 </style>

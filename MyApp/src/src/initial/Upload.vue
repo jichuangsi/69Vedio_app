@@ -44,7 +44,7 @@
         <div class="video_price">
             <div class="h4">
                 设置价格
-                <span>（1元=10金币）</span>
+                <span>（1元={{golerate}}金币）</span>
             </div>
             <div class="ipt">
                 <input type="number" v-model="money"><span>(若不输入价格则为免费)</span>
@@ -114,7 +114,7 @@
 
 <script>
 import axios from 'axios'
-import {upload,gettags,getclasses} from '@/api/api'
+import {upload,gettags,getclasses,getgolerate} from '@/api/api'
 import { Toast } from 'mint-ui';
 import load from '@/components/loading'
 import  top  from '@/components/top'
@@ -150,7 +150,8 @@ export default {
       classes_arr:[],
       tags_id:[],
       classes_id:'',
-      uploadbtn:true
+      uploadbtn:true,
+      golerate:''
     }
   },
   computed:{
@@ -170,16 +171,20 @@ export default {
   methods: {
       getdata(){
           gettags().then(res=>{
-              console.log(res)
+            //   console.log(res)
             //   if(res.data.resultCode == 0){
                 this.tags_arr = res.data.data
             //   }
           })
           getclasses().then(res=>{
-              console.log(res)
+            //   console.log(res)
             //   if(res.data.resultCode == 0){
                 this.classes_arr = res.data.data
             //   }
+          })
+          getgolerate().then(res=>{
+              console.log(res)
+            this.golerate = res.data.data.goldrate
           })
       },
       uploadBtn(){
@@ -309,12 +314,17 @@ export default {
     zp(){
         let self = this
         if(self.ready){
+         let ratio = window.screen.width / window.screen.height;
+         let targetHeight = window.screen.height / 0.5;
+         let targetWidth = targetHeight * ratio;
         navigator.camera.getPicture(onSuccess, onFail, {
           quality: 100,
           destinationType: Camera.DestinationType.NATIVE_URI,
           mediaType: 0,
           saveToPhotoAlbum: true,
           cameraDirection: 0,
+          targetWidth:targetWidth,
+          targetHeight:targetHeight,
           encodingType: Camera.EncodingType.PNG
         });
         function onSuccess(imageData) {

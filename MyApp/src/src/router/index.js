@@ -14,6 +14,8 @@ import Profit from '@/initial/Profit'
 import Rechargerecord from '@/initial/Rechargerecord'
 import edit from '@/initial/edit'
 import follow from '@/initial/follow'
+import card from '@/initial/card'
+import VIP from '@/initial/VIP'
 import notice from '@/components/notice'
 import nearby from '@/components/nearby'
 import friend from '@/components/friend'
@@ -115,6 +117,16 @@ export default new Router({
       path: '/follow',
       name: 'follow',
       component: follow
+    },
+    {
+      path: '/card',
+      name: 'card',
+      component: card
+    },
+    {
+      path: '/VIP',
+      name: 'VIP',
+      component: VIP
     },
     {
       path: '/Video_play',

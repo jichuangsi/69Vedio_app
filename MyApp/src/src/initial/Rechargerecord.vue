@@ -2,38 +2,96 @@
     <div class="Rechargerecord">
         <top :top_arr="top_arr"></top>
     <div class="center">
-                <div class="li">
+                <ScrollContent ref="myscrollfull" @load="loadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+                <div class="li" v-for="(item,index) in list_arr" :key="index" v-if="id == 1">
                     <div class="left_li">
-                        <div>提现100金币</div>
-                        <span>2019/09/09 12:00:00</span>
+                        <div>提现{{item.gold}}金币</div>
+                        <span>{{item.add_time}}</span>
                     </div>
                     <div class="right_li">
-                        <div>+100</div>
-                        <span>充值成功</span>
+                        <div>{{item.gold}}</div>
+                        <span v-if="item.status == 0">处理中</span>
+                        <span v-if="item.status == 1">提现成功</span>
+                        <span v-if="item.status == 2">提现失败</span>
                     </div>
                 </div>
+                <div class="li" v-for="(item,index) in list_arr" :key="index" v-if="id == 2">
+                    <div class="left_li">
+                        <div v-if="item.buy_type == 1">购买金币</div>
+                        <div v-if="item.buy_type == 2">{{item.buy_vip_info.name}}</div>
+                        <span>{{item.add_time}}</span>
+                    </div>
+                    <div class="right_li">
+                        <div v-if="item.buy_type == 2">{{item.price}}</div>
+                        <div v-if="item.buy_type == 1">{{item.buy_glod_num}}</div>
+                    </div>
+                </div>
+                </ScrollContent>
     </div>
     </div>
 </template>
 
 <script>
+import {getgolerate,cashlist,rechargelist} from '@/api/api'
+import ScrollContent from '@/components/ScrollContent'
 import  top  from '@/components/top'
+import { Toast } from 'mint-ui';
 export default {
   name: 'Rechargerecord',
   components: {
-    top
+    top,
+    ScrollContent
   },
   data() {
     return {
         top_arr:{left:true,title:'充值明细',right:{title:'充值明细',url:false}},
+        id:'',
+        list_arr:[],
+        mescrollValue: {up: true, down: false},     //页面你是否需要下拉上拉加载
+        page:1
     }
   },
   mounted () {
+      this.id = window.location.href.split('title=')[1]
+      this.top_arr.title = this.id == 1?'提现明细':'充值明细'
+      this.getdata()
   },
   methods: {
-    back(){
-      window.history.go(-1)
-    }
+      getdata(){
+          if(this.id == 1){
+              cashlist(this.page).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 0&&res.data.data.drlist.length != 0){
+                    this.list_arr.push(...res.data.data.drlist)
+                    this.page = this.page+1
+                }
+                    if(res.data.data.drlist.length == 0){
+                        Toast('没有更多了...')
+                        this.mescrolls.endByPage(0,1)
+                    }
+                    this.mescrolls.endErr()
+            })
+          }else{
+              rechargelist(this.page).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 0&&res.data.data.drlist.length != 0){
+                    this.list_arr.push(...res.data.data.drlist)
+                    this.page = this.page+1
+                }
+                    if(res.data.data.drlist.length == 0){
+                        Toast('没有更多了...')
+                        this.mescrolls.endByPage(0,1)
+                    }
+                    this.mescrolls.endErr()
+            })
+          }
+      },
+    mescrollsInit (mescrolls) {
+        this.mescrolls = mescrolls;
+    },
+    loadDatas(){
+        this.getdata()
+    },
   }
 }
 </script>
@@ -76,7 +134,8 @@ export default {
     display: block;
 }
 .center {
-    padding: 60px 30px;
+    height: 90vh;
+    position: relative;
     .li {
         width: 100%;
         display: flex;
@@ -111,5 +170,13 @@ export default {
             }
         }
     }
+}
+.mescroll {
+    position: absolute;
+    left: 0px;
+	top:0px;
+	height: 90vh; /*如设置bottom:50px,则需height:auto才能生效*/
+    padding: 60px 30px;
+    padding-bottom: 200px;
 }
 </style>

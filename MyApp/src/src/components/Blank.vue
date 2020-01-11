@@ -17,6 +17,15 @@ import {register,locate} from '@/api/api'
     },
     mounted() {
         this.initialize()
+        register().then(res=>{
+                            console.log(res)
+                            if(res.data.resultCode == 0){
+                                sessionStorage.setItem('usermessage',JSON.stringify(res.data.data))
+                                self.goindex()
+                            }
+                        }).catch(err=>{
+                            console.log(err)
+                        })
     },
     methods: {
     initialize() {

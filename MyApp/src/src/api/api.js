@@ -1,6 +1,7 @@
 import axios from '../utils/axios'
 // import axios from 'axios'
 
+
 //登录
 export function register(equipInfo) {
   return axios({
@@ -402,6 +403,97 @@ export function tryandsee(vid) {
     url: `/Memberservice/tryandsee`,
     data:{
       vid
+    }
+  });
+}
+// /Goldservice/getgolerate获取金币汇率、最低提现、是否提现
+export function getgolerate() {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/getgolerate`,
+  });
+}
+// /Goldservice/getgoldlist获取金币套餐
+export function getgoldlist() {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/getgoldlist`,
+  });
+}
+// /Goldservice/getviplist获取金VIP套餐
+export function getviplist() {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/getviplist`,
+  });
+}
+// Goldservice/cashwithdrawal提现申请
+export function cashwithdrawal(gold,money,cid) {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/cashwithdrawal`,
+    data:{
+      gold,money,cid
+    }
+  });
+}
+
+// /Goldservice/getgoldrecord获取用户支出，收入
+export function getgoldrecord(gstatus,page,gtype) {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/getgoldrecord`,
+    data:{
+      gstatus,page,gtype
+    }
+  });
+}
+// /Memberservice/getcard
+export function getcard() {
+  return axios({
+    method: 'POST',
+    url: `/Memberservice/getcard`,
+  });
+}
+// /Memberservice/editcard
+export function editcard(aname,account,type,bank) {
+  return axios({
+    method: 'POST',
+    url: `/Memberservice/editcard`,
+    data:{
+      aname,account,type,bank
+    }
+  });
+}
+
+// /Goldservice/viprechargeVIP充值
+export function viprecharge(rid) {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/viprecharge`,
+    data:{
+      rid
+    }
+  });
+}
+// /Goldservice/cashlist提现记录
+export function cashlist(page) {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/cashlist`,
+    data:{
+      page
+    }
+  });
+}
+
+// /Goldservice/rechargelist充值记录
+export function rechargelist(page) {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/rechargelist`,
+    data:{
+      page
     }
   });
 }

@@ -18,6 +18,11 @@
                 <div>{{nickname}}</div>
                 <em>></em>
             </div>
+            <div class="info_li" @click="iptbox(3)">
+                <span>手机号码</span>
+                <div>{{phone}}</div>
+                <em>></em>
+            </div>
             <div class="info_li" @click="iptbox(1)">
                 <span>账户</span>
                 <div>{{username}}</div>
@@ -41,6 +46,11 @@
             <div class="info_li" @click="picker_dq = !picker_dq">
                 <span>地区</span>
                 <div>{{regionname}}</div>
+                <em>></em>
+            </div>
+            <div class="info_li" @click="cardgo">
+                <span>卡包</span>
+                <div></div>
                 <em>></em>
             </div>
         </div>
@@ -97,6 +107,7 @@
         <div class="message_box" style="-webkit-user-select:text !important;">
             <div class="title">{{message_text}}</div>
             <input type="text" v-model="nickname" maxlength="8" v-if="message_index == 0">
+            <input type="text" v-model="phone" v-if="message_index == 3" onkeyup="this.value=this.value.replace(/\D/g,'');">
             <input type="text" v-model="username" maxlength="10" v-if="message_index == 1" onkeyup="this.value=this.value.replace(/[^\w]/g,'');">
             <textarea v-model="introduce" maxlength="100" v-if="message_index == 2"></textarea>
             <div class="btn">
@@ -135,6 +146,7 @@ export default {
         introduce:'',
         sex:1,
         username:'',
+        phone:'',
         nickname:'',
         regionname:'',
         fileimg:'',
@@ -189,16 +201,17 @@ export default {
         this.birthday = user.birthday
         this.regionname = user.regionname
         this.fileimg = user.headimgurl
+        this.phone = user.tel
     },
     edit(){
         this.param.append('username',this.username)
         this.param.append('nickname',this.nickname)
         this.param.append('sex',this.sex)
+        this.param.append('tel',this.phone)
         this.param.append('introduce',this.introduce)
         this.param.append('birthday',this.birthday)
         this.param.append('region',this.dq_data)
         this.editbtn = false
-        console.log(this.param.get('fileimg').type)
         editmemberinfo(this.param).then(res=>{
             console.log(res)
             this.editbtn = true
@@ -213,6 +226,7 @@ export default {
                 })
             }
         }).catch(err=>{
+            console.log(err)
             this.editbtn = true
         })
     },
@@ -237,10 +251,17 @@ export default {
             this.message_text = '请输入用户账户'
         }else if(index == 2){
             this.message_text = '请输入简介'
+        }else if(index == 3){
+            this.message_text = '请输入手机号'
         }
     },
     back(){
       window.history.go(-1)
+    },
+    cardgo(){
+        this.$router.push({
+          path: '/card',
+        })
     },
     handleConfirm (data) {
         this.birthday = this.gettime(data)
@@ -253,12 +274,17 @@ export default {
     ps(){
         let self = this
         if(self.ready){
+         let ratio = window.screen.width / window.screen.height;
+         let targetHeight = window.screen.height / 0.5;
+         let targetWidth = targetHeight * ratio;
         navigator.camera.getPicture(onSuccess, onFail, {
           quality: 50,
           destinationType: Camera.DestinationType.NATIVE_URI,
           mediaType: 0,
           saveToPhotoAlbum: true,
           cameraDirection: 0,
+          targetWidth:targetWidth,
+          targetHeight:targetHeight,
           encodingType: Camera.EncodingType.PNG
         });
         function onSuccess(imageData) {
@@ -435,6 +461,7 @@ export default {
             display: flex;
             justify-content: space-between;
             font-size: 28px;
+            line-height: 36px;
             color: #999;
             padding: 20px;
             div {
