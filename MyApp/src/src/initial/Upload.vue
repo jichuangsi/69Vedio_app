@@ -113,7 +113,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import {upload,gettags,getclasses,getgolerate} from '@/api/api'
 import { Toast } from 'mint-ui';
 import load from '@/components/loading'
@@ -167,6 +166,14 @@ export default {
     this.initialize();
     this.getdata()
     this.param = new FormData()
+
+    // var video = document.createElement('video');
+    // video.src = 'http://192.168.31.123:96/uploads/202191228/Dhj5yFXiefhhzf2dBjAMyPEr3Dek4fHi.mp4';
+    // video.onerror = function() {
+    //     alert('error, couldn\'t load');
+    //     // don't show video element
+    // }
+
   },
   methods: {
       getdata(){
@@ -258,7 +265,7 @@ export default {
             onSuccess,// 视频录制功后的处理成
             onFail, // 视频录制失败后的处理
             {
-                duration: 15,// 限制录制的视频时间长度，单位：/秒
+                duration: 60,// 限制录制的视频时间长度，单位：/秒
                 limit:1, // 非必填，不写此项时，默认为1
                 // 在ios一次只能录一个视频，
                 //在Android上，连续录制视频的个数受limit的限制
@@ -525,7 +532,7 @@ export default {
                 self.$refs.sp_video.src = urlpath
             }
         }else{
-
+            
           console.log(urlpath);
           window.resolveLocalFileSystemURL(
             urlpath,
@@ -543,7 +550,7 @@ export default {
                 {
                   fileUri: fileurl,
                   outputFileName: videoFileName,
-                  outputFileType: VideoEditorOptions.OutputFileType.MPEG4,
+                  outputFileType: VideoEditorOptions.OutputFileType.QUICK_TIME,
                   optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES,
                   saveToLibrary: true,
                   maintainAspectRatio: true,
@@ -555,7 +562,7 @@ export default {
                   audioSampleRate: 44100,
                   audioBitrate: 128000, // 128 kilobits
                   progress: function(info) {
-                    console.log('transcodeVideo progress callback, info: ' + info);
+                    // console.log('transcodeVideo progress callback, info: ' + info);
                   }
                 }
               );
@@ -596,9 +603,10 @@ export default {
         }
 
             function videoTranscodeSuccess(result) {
+                    console.log(111)
+                    console.log(result)
                     self.filevideo = result
                     self.$refs.sp_video.src = result
-                    self.uploadbtn = true
                     let url = 'file://'+result
                     self.zhuan(url)
             }
@@ -627,25 +635,31 @@ export default {
         let self = this
         window.resolveLocalFileSystemURL(url, (fileEntry) => {
             fileEntry.file(function (file) {
+                console.log(file)
                 if(file.type.indexOf('image')!=-1&&file.size>5048576){
                     Toast('图片过大')
                 }
-                if(file.type.indexOf('video')!=-1&&file.size>30485760){
-                    Toast('视频过大')
-                }
+                // if(file.type.indexOf('video')!=-1&&file.size>30485760){
+                //     Toast('视频过大')
+                // }
+                console.log(2222)
             var reader = new FileReader()
             reader.readAsArrayBuffer(file);
             reader.onload = function() {
             let imgBlob = new Blob([this.result], {
                 type: file.type
             })
+            self.uploadbtn = true
+            console.log(444)
             if(file.type.indexOf('image')!=-1){
+                console.log(555)
                 if(file.type.indexOf('png')!=-1){
                     self.param.append('fileimg', imgBlob, file.name+'.png')
                 }else{
                     self.param.append('fileimg', imgBlob, file.name)
                 }
                     }else{
+                        console.log(333)
                     self.param.append('filevideo', imgBlob, file.name)
                     }
                     }

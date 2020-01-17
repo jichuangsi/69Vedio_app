@@ -20,7 +20,8 @@ const latestVideos = {
     mylikeVideosList: [],
     buyVideosPage: 1,
     buyVideosList: [],
-    Popularity:{}
+    Popularity:{},
+    activity_data:[]
   },
   mutations: {
     //官方
@@ -152,6 +153,10 @@ const latestVideos = {
     //人气Popularity
     SET_POPULARITY :(state, newData) =>{
       state.Popularity = newData;
+    },
+    //人气activity_data
+    SET_ACTIVITY_DATA :(state, newData) =>{
+      state.activity_data = newData;
     }
   },
   actions: {

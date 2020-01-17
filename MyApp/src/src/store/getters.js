@@ -19,6 +19,7 @@ const getters = {
   buyVideosPage: state => state.latestVideos.buyVideosPage,
   buyVideosList: state => state.latestVideos.buyVideosList,
   Popularity: state => state.latestVideos.Popularity,
+  activity_data: state => state.latestVideos.activity_data,
 }
 
 export default getters;

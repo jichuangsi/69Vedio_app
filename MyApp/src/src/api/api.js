@@ -497,3 +497,13 @@ export function rechargelist(page) {
     }
   });
 }
+// /Goldservice/getposter广告
+export function getposter(aid) {
+  return axios({
+    method: 'POST',
+    url: `/Goldservice/getposter`,
+    data:{
+      aid
+    }
+  });
+}

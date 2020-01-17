@@ -3,9 +3,13 @@
         <top :top_arr="top_arr"></top>
         <div class="center">
         <ScrollContent ref="myscrollfull" @load="loadDatas" @reload="reloadDatas" :mescrollValue="mescrollValue" @init="mescrollsInit">
+        <swiper v-if="activity_arr.length>1" :options="activity" ref="activity">
+          <swiper-slide v-for="(item,index) in activity_arr" :key="index">
             <div class="activity">
-                <img src="../assets/images/微信图片_20191212151058.png" alt="">
+                <img :src="item.content" alt="">
             </div>
+          </swiper-slide>
+        </swiper>
             <div class="nav">
                 <div v-for="(item,index) in popularrank_arr" :key="index">
                     <span>top{{index+1}}</span>
@@ -108,9 +112,10 @@
 </template>
 
 <script>
-import {popularrank,inviterank,uploadrand,homevideo} from '@/api/api'
+import {popularrank,homevideo,getposter} from '@/api/api'
 import  foot  from '@/components/Foot'
 import ScrollContent from '@/components/ScrollContent'
+import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import { Toast } from 'mint-ui';
 import  top  from '@/components/top'
 import {mapGetters} from 'vuex'
@@ -120,6 +125,8 @@ export default {
   components: {
     foot,
     ScrollContent,
+    swiper,
+    swiperSlide,
     top
   },
   data() {
@@ -132,6 +139,11 @@ export default {
         uploadimg:'',
         page:1,
         mescrollValue: {up: true, down: true},     //页面你是否需要下拉上拉加载
+        activity: {
+            autoplay: true,
+            loop: true,
+        },
+        activity_arr:[]
     }
   },
   computed: {
@@ -139,12 +151,14 @@ export default {
     ...mapGetters([
       'homeVideosList',
       'homeVideosPage',
-      'Popularity'
+      'Popularity',
+      'activity_data'
     ])
   },
   mounted () {
       this.getdata()
       this.getvideo()
+      this.getAdvertisement()
   },
   methods: {
     getdata(){
@@ -160,6 +174,19 @@ export default {
                     this.popularrank_arr = res.data.data.good
                     this.inviteimg = res.data.data.invite[0].headimgurl
                     this.uploadimg = res.data.data.upload[0].headimgurl
+                }
+            })
+        }
+    },
+    getAdvertisement(){
+        if(this.activity_data.length>0){
+            this.activity_arr = this.activity_data
+        }else{
+            getposter(1).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 0){
+                    this.activity_arr = res.data.data
+                    store.commit('SET_ACTIVITY_DATA', res.data.data);
                 }
             })
         }
