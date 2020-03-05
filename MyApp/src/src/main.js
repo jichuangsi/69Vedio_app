@@ -10,14 +10,15 @@ Vue.use(VueAwesomeSwiper)
 import 'swiper/css/swiper.css'
 import store from './store/index'
 
+
 import MintUI from 'mint-ui'
 import 'mint-ui/lib/style.css'
 import './assets/style/reset.css'
 Vue.use(MintUI)
 
-import Vconsole from 'vconsole'
-const vConsole = new Vconsole()
-Vue.use(vConsole) 
+// import Vconsole from 'vconsole'
+// const vConsole = new Vconsole()
+// Vue.use(vConsole) 
 
 import VueClipboard from 'vue-clipboard2'
 Vue.use(VueClipboard)

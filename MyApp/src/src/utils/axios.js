@@ -1,9 +1,9 @@
 import axios from 'axios'
 //axios请求封装
 const service = axios.create();
-const apiHost = 'http://192.168.31.123:96'
+// const apiHost = 'http://192.168.31.123:96'
 // const apiHost = 'http://192.168.31.108:71';
-// const apiHost = 'http://b.aff69.cc'
+const apiHost = 'http://b.69vedio.com'
 // const apiHost = 'http://b.aff69.cc:89'
 service.interceptors.request.use(function (config) {
 

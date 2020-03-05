@@ -125,7 +125,7 @@ import {videocollection,cancelcollection,getcomments,submitcomment,buyvideo,trya
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import ScrollContent from '@/components/ScrollContent'
 import load from '@/components/loading'
-import { Toast } from 'mint-ui';
+import { Toast,MessageBox } from 'mint-ui';
 export default {
   name: 'Single_video',
   components: {
@@ -180,7 +180,11 @@ export default {
         self.video_arr[0].play()
         self.video_check = self.video_arr[0]
       }else{
-        Toast(res.data.error)
+        MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                        this.$router.push({
+                         path:'/VIP',
+                        })
+                    });
       }
     })
         self.user = JSON.parse(sessionStorage.getItem('usermessage'))
@@ -198,7 +202,11 @@ export default {
                         this.video_arr[i].play()
                         this.video_check =this.video_arr[i]
                     }else{
-                        Toast(res.data.error)
+                        MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                            this.$router.push({
+                             path:'/VIP',
+                            })
+                        });
                     }
                 })
             }else{
@@ -344,7 +352,11 @@ export default {
                         this.video_check = this.video_arr[0]
                         sessionStorage.setItem('Single'+sessionStorage.getItem('frequency'),JSON.stringify(this.video_data))
                     }else{
-                        Toast(res.data.error)
+                        MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                            this.$router.push({
+                             path:'/VIP',
+                            })
+                        });
                     }
                 })
             }

@@ -123,7 +123,7 @@ import {concernvideos ,videocollection,cancelcollection,getcomments,submitcommen
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import ScrollContent from '@/components/ScrollContent'
 import load from '@/components/loading'
-import { Toast } from 'mint-ui';
+import { Toast,MessageBox } from 'mint-ui';
 export default {
   name: 'follow_video',
   components: {
@@ -177,7 +177,11 @@ export default {
                 if(res.data.resultCode == 0||res.data.resultCode == 9021){
                     this.video_check.play()
                 }else{
-                    Toast(res.data.error)
+                    MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                        this.$router.push({
+                         path:'/VIP',
+                        })
+                    });
                 }
               })
           }
@@ -204,7 +208,11 @@ export default {
                 self.video_check = self.video_arr[sessionStorage.getItem('follow_videoIndex')]
                 self.swiper_arr = document.getElementsByClassName('swiper-container')
             }else{
-                    Toast(res.data.error)
+                    MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                        this.$router.push({
+                         path:'/VIP',
+                        })
+                    });
                 }
         })
     }else{
@@ -242,7 +250,11 @@ export default {
                         self.video_check = self.video_arr[index]
                         self.swiper_arr = document.getElementsByClassName('swiper-container')
                     }else{
-                        Toast(res.data.error)
+                        MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                        this.$router.push({
+                         path:'/VIP',
+                        })
+                    });
                     }
                 })
             }
@@ -281,7 +293,11 @@ export default {
                         this.video_check =this.video_arr[i]
                         sessionStorage.setItem('follow_videoIndex',this.Recommendswiper.realIndex)
                     }else{
-                        Toast(res.data.error)
+                        MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                        this.$router.push({
+                         path:'/VIP',
+                        })
+                    });
                     }
                 })
             }else{
@@ -401,7 +417,11 @@ export default {
                         this.video_check = this.video_arr[sessionStorage.getItem('recommend_videoIndex')]
                         sessionStorage.setItem('recommend_video',JSON.stringify(this.video_data))
                     }else{
-                        Toast(res.data.error)
+                        MessageBox.confirm('免费次数已用完，请前往充值!').then(action => {
+                        this.$router.push({
+                         path:'/VIP',
+                        })
+                    });
                     }
                 })
             }

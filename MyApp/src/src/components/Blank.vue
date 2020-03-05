@@ -9,7 +9,7 @@
 
 <script>
 import enquip from '../lib/equipInfo'
-import {register,locate} from '@/api/api'
+import {register,locate,getmemberinfo} from '@/api/api'
   export default {
     name: "Blank",
     data() {
@@ -31,8 +31,13 @@ import {register,locate} from '@/api/api'
                             console.log(res)
                             if(res.data.resultCode == 0){
                                 sessionStorage.setItem('usermessage',JSON.stringify(res.data.data))
-                                self.goindex()
-                            }
+                                getmemberinfo().then(res=>{
+                                        if(res.data.resultCode == 0){
+                                            sessionStorage.setItem('user',JSON.stringify(res.data.data))
+                                            self.goindex()
+                                        }
+                                    })
+                                }
                         }).catch(err=>{
                             console.log(err)
                         })

@@ -34,6 +34,7 @@ import searchList from '@/components/searchList'
 import top from '@/components/top'
 import Foot from '@/components/Foot'
 
+
 Vue.use(Router)
 
 export default new Router({
